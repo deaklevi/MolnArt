@@ -1,5 +1,8 @@
 <template>
-    <h1 class="text-2xl font-bold">Hello, World!</h1>
+  <div>
+    <h1>Üdv az oldalon</h1>
+    <MyButton /> 
+  </div>
 </template>
 
 <script>
