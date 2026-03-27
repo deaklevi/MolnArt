@@ -1,8 +1,9 @@
 <template>
-  <div>
-    <h1>Üdv az oldalon</h1>
-    <MyButton /> 
-  </div>
+    <LayoutsBaseLayout>
+        <h1 class="text-3xl font-bold underline">
+            Hello world!
+        </h1>
+    </LayoutsBaseLayout>
 </template>
 
 <script>
