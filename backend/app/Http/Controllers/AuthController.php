@@ -14,7 +14,7 @@ use App\Models\User;
 class AuthController extends Controller
 {
     public function index() {
-        return UserResource::collection(User::all());
+        return UserResource::collection(User::with('services')->get());
     }
 
     public function login(Request $request)
