@@ -39,8 +39,10 @@ class User extends Authenticatable
     {
         return $this->hasMany(Review::class);
     }
-    public function services():HasMany
+
+    public function services()
     {
-        return $this->hasMany(Service::class);
+        // A 'withTimestamps' azért kell, ha látni akarjuk, mikor rendelték hozzá
+        return $this->belongsToMany(Service::class);
     }
 }

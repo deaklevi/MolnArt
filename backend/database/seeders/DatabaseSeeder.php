@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Service;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -42,5 +43,12 @@ class DatabaseSeeder extends Seeder
         }
 
         $this->call(ServiceSeeder::class);
+
+       $allServiceIds = Service::pluck('id')->toArray();
+
+        $users = \App\Models\User::all();
+        foreach ($users as $user) {
+            $user->services()->attach($allServiceIds);
+        }
     }
 }

@@ -19,8 +19,10 @@ Route::middleware('auth:sanctum')->group(function () {
     
     Route::post('/user/update', [AuthController::class, 'updateProfile']);
 
+    Route::post('/user/services/sync', [AuthController::class, 'syncServices']);
+
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/user', function (Request $request) {
-        return response()->json($request->user());
+        return response()->json($request->user()->load('services'));
     });
 });
