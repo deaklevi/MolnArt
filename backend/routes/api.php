@@ -9,14 +9,16 @@ use Illuminate\Support\Facades\Route;
 // Nyilvános
 Route::post('/login', [AuthController::class, 'login']);
 
+Route::apiResource('services', ServiceController::class);
+Route::apiResource('customers', CustomerController::class);
+
 // Védett
 Route::middleware('auth:sanctum')->group(function () {
     
+    Route::post('/user/update', [AuthController::class, 'updateProfile']);
+
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/user', function (Request $request) {
         return response()->json($request->user());
     });
-
-    Route::apiResource('services', ServiceController::class);
-    Route::apiResource('customers', CustomerController::class);
 });
