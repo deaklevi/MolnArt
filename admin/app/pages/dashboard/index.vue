@@ -4,16 +4,38 @@ definePageMeta({
   middleware: 'auth'
 })
 
+const getCsrfToken = () => {
+  const match = document.cookie.match(new RegExp('(^| )XSRF-TOKEN=([^;]+)'));
+  if (match) {
+    return decodeURIComponent(match[2]);
+  }
+  return null;
+}
+
 const { data: user, error } = await useFetch('http://localhost:8000/api/user', {
   credentials: 'include', // Kiemelten fontos: küldi a sütiket!
 })
 
 const logout = async () => {
-  await $fetch('http://localhost:8000/logout', { 
-    method: 'POST',
-    credentials: 'include' 
-  });
-  navigateTo('/login');
+  try {
+    await $fetch('http://localhost:8000/api/logout', { 
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        'Accept': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest',
+        // Ha továbbra is 419-et dobna a logout, ide is kell a CSRF:
+        'X-XSRF-TOKEN': getCsrfToken() 
+      }
+    });
+    
+    // Siker esetén töröljük a lokális dolgokat és irány a login
+    navigateTo('/'); 
+  } catch (error) {
+    console.error("Logout hiba:", error);
+    // Még ha hiba is van (pl. lejárt session), érdemes visszavinni a felhasználót
+    navigateTo('/');
+  }
 }
 </script>
 
