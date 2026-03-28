@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\ServiceController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -12,6 +13,7 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::apiResource('/user_public_data', AuthController::class)->only('index');
 
 Route::apiResource('services', ServiceController::class);
+Route::apiResource('reviews', ReviewController::class);
 Route::apiResource('customers', CustomerController::class);
 
 // Védett

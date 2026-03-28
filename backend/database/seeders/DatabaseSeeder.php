@@ -27,13 +27,13 @@ class DatabaseSeeder extends Seeder
                 'user_name' => 'admin_kata',
                 'password' => Hash::make('jelszo456'),
                 'description' => 'Tartalomkezelő',
-                'profile_image' => "/storage/avatars/kep1.jpg"
+                'profile_image' => "/storage/avatars/kep2.jpg"
             ],
             [
                 'user_name' => 'admin_bela',
                 'password' => Hash::make('admin789'),
                 'description' => 'Rendszergazda',
-                'profile_image' => "/storage/avatars/kep1.jpg"
+                'profile_image' => "/storage/avatars/kep3.jpg"
             ],
         ];
 
@@ -41,6 +41,6 @@ class DatabaseSeeder extends Seeder
             User::create($admin);
         }
 
-        $this->call(ServiceSeeder::class);
+        $this->call([ServiceSeeder::class,ReviewSeeder::class]);
     }
 }
