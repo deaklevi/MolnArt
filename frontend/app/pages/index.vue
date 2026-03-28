@@ -5,6 +5,8 @@ const config = useRuntimeConfig();
 const { data: publicUsers } = await useAsyncData('users', () => $fetch(`${config.public.apiBase}/api/user_public_data`));
 const { data: servicesData } = await useAsyncData('services', () => $fetch(`${config.public.apiBase}/api/services`));
 const {data: reviews} = await useFetch(`${config.public.apiBase}/api/reviews`);
+import ReviewsSlot from '~/components/Review/ReviewsSlot.vue';
+import ReviewsCard from '~/components/Review/ReviewCard.vue';
   
 </script>
 
