@@ -66,6 +66,15 @@
             </div>
         </div>
     </div>
+
+    <div class="min-h-screen bg-gray-100 flex items-center p-4">
+        <div class="w-full flex flex-wrap justify-center gap-8">
+            <WorkerCard />
+            <WorkerCard />
+            <WorkerCard />
+        </div>
+    </div>
+    
 </template>
 
 <script setup>
