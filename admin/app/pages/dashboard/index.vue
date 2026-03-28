@@ -12,8 +12,11 @@ const getCsrfToken = () => {
   return null;
 }
 
-const { data: user, error } = await useFetch('http://localhost:8000/api/user', {
-  credentials: 'include', // Kiemelten fontos: küldi a sütiket!
+// Fontos: server: false, hogy ne akadjon össze az SSR-el süti hiányában
+const { data: user, pending, error } = await useFetch('http://localhost:8000/api/user', {
+  credentials: 'include',
+  server: false, 
+  lazy: false // Megvárjuk, amíg az adat megjön
 })
 
 const logout = async () => {
@@ -40,23 +43,30 @@ const logout = async () => {
 </script>
 
 <template>
-  <div v-if="user" class="admin-container">
-    <header>
-      <img :src="user.profile_image || 'https://via.placeholder.com/150'" alt="Profile">
-      <h1>Üdvözöllek, {{ user.user_name }}!</h1>
-      <p>Jogosultság: {{ user.description }}</p>
-      <button @click="logout">Kijelentkezés</button>
-    </header>
+  <ClientOnly>
+    <div v-if="pending">
+      <p>Betöltés...</p>
+    </div>
 
-    <main>
-      <h2>Admin Vezérlőpult</h2>
-      <p>Ezt a felületet csak a 3 előre létrehozott admin látja.</p>
-      
-      <div class="stats">
-        <p>Saját szolgáltatások száma: {{ user.services?.length || 0 }}</p>
-      </div>
-    </main>
-  </div>
+    <div v-else-if="user" class="admin-container">
+      <header>
+        <h1>Üdvözöllek, {{ user.user_name }}!</h1>
+        <button @click="logout">Kijelentkezés</button>
+      </header>
+      <main>
+        <h2>Admin Vezérlőpult</h2>
+        <p>Saját szolgáltatások: {{ user.services?.length || 0 }}</p>
+      </main>
+    </div>
+
+    <div v-else>
+      <p>Hiba történt a belépés során. <NuxtLink to="/">Jelentkezz be újra!</NuxtLink></p>
+    </div>
+
+    <template #fallback>
+      <p>Oldal betöltése...</p>
+    </template>
+  </ClientOnly>
 </template>
 
 <style scoped>

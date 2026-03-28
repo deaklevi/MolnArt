@@ -1,20 +1,16 @@
+// middleware/auth.ts
 export default defineNuxtRouteMiddleware(async (to, from) => {
-  // Csak kliens oldalon futtatjuk az ellenőrzést, hogy elkerüljük az SSR hibákat
+  // Nagyon fontos: Szerver oldalon (SSR) ne csináljon semmit, 
+  // mert ott nincsenek sütik, és mindig hibát dobna!
   if (import.meta.server) return;
 
   try {
-    // A $fetch-et használjuk useFetch helyett a middleware-ben!
     await $fetch('http://localhost:8000/api/user', {
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'X-Requested-With': 'XMLHttpRequest',
-      },
-      credentials: 'include', // Fontos a süti miatt!
+      credentials: 'include',
+      headers: { 'X-Requested-With': 'XMLHttpRequest' }
     });
   } catch (error) {
-    // Ha a Laravel 401-et vagy hibát dob, nem vagyunk belépve
-    console.error("Auth hiba, irány a login...");
+    // Csak ha valóban hiba van (lejárt session), akkor vigyen a loginra
     return navigateTo('/');
   }
 });
