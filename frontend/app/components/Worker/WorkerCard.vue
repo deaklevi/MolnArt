@@ -14,10 +14,9 @@
 </template>
 
 <script setup>
-
     const config = useRuntimeConfig();
     const apiBase = config.public.apiBase;
-    console.log(apiBase)
+
     const props = defineProps({
         worker:{
             type:Object,
