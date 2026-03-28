@@ -5,7 +5,7 @@ namespace App\Http\Resources;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class ServiceResource extends JsonResource
+class ReviewResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -16,9 +16,12 @@ class ServiceResource extends JsonResource
     {
         return [
             'id' => $this->id,
+            'profile_image' => $this->profile_image,
             'name' => $this->name,
-            'time' => $this->time,
-            'users' => UserResource::collection($this->whenLoaded('users')),
+            'rating' => $this->rating,
+            'comment' => $this->comment,
+            'user_id' => $this->user_id,
+            'user' => new UserResource($this->whenLoaded('user')),
         ];
     }
 }
