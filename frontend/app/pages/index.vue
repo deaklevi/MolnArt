@@ -44,5 +44,6 @@ import ReviewsCard from '~/components/Review/ReviewCard.vue';
     </h2>
     <ReviewsSlot :reviews="reviews.data" />
     </section>
+    <BaseAboutUs/>
   </div>
 </template>
