@@ -1,6 +1,6 @@
 <template>
     <div class="group relative md:w-60 lg:w-72 overflow-hidden rounded-xl shadow-lg cursor-pointer hover:scale-105 transform transition">
-        <img class="w-full h-full " :src="worker.profile_image" :alt="worker.user_name">
+        <img class="w-full h-full object-cover" :src="apiBase+worker.profile_image" :alt="worker.user_name">
         <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-60 transition-all duration-300"></div>
 
         <div class="absolute inset-0 flex flex-col items-center justify-end p-6 text-center text-white opacity-0 group-hover:opacity-100 transform translate-y-4 group-hover:translate-y-0 transition-all duration-300">
@@ -15,6 +15,9 @@
 
 <script setup>
 
+    const config = useRuntimeConfig();
+    const apiBase = config.public.apiBase;
+    console.log(apiBase)
     const props = defineProps({
         worker:{
             type:Object,
