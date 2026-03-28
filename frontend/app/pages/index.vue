@@ -85,7 +85,7 @@ const config = useRuntimeConfig();
 const { data: publicUsers } = await useFetch(`${config.public.apiBase}/api/user_public_data`);
 
 console.log("asdasda")
-console.log(publicUsers)
+console.log(publicUsers.value.data)
 
 const workers = ref([
   {
