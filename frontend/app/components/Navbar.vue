@@ -14,7 +14,7 @@
                 <span class="absolute w-8 h-[2px] transition-all duration-300 ease-in-out" :class="[isMenuOpen ? '-rotate-45 translate-y-0 bg-[#b5a494]' : 'translate-y-2.5 bg-white']"></span>
             </button>
 
-            <ul class="hidden md:flex space-x-12 text-white text-[11px] uppercase tracking-[0.25em] font-medium">
+            <ul class="hidden md:flex space-x-10 text-white text-sm uppercase tracking-[0.2em] font-light">
                 <li><a class="relative group py-2 transition duration-300 hover:text-[#b5a494]" href="#home">Főoldal <span class="absolute bottom-0 left-0 w-0 h-[1px] bg-[#b5a494] transition-all duration-500 ease-out group-hover:w-full"></span></a></li>
                 <li><a class="relative group py-2 transition duration-300 hover:text-[#b5a494]" href="#gallery">Galéria <span class="absolute bottom-0 left-0 w-0 h-[1px] bg-[#b5a494] transition-all duration-500 ease-out group-hover:w-full"></span></a></li>
                 <li><a class="relative group py-2 transition duration-300 hover:text-[#b5a494]" href="#services">Szolgáltatások <span class="absolute bottom-0 left-0 w-0 h-[1px] bg-[#b5a494] transition-all duration-500 ease-out group-hover:w-full"></span></a></li>
