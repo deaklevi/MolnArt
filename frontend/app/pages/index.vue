@@ -41,5 +41,6 @@ const {data: reviews} = await useFetch(`${config.public.apiBase}/api/reviews`);
       Nézd meg értékeléseinket
     </h2>
     <ReviewsSlot :reviews="reviews.data" />
+    </section>
   </div>
 </template>
