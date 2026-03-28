@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Service;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -41,6 +42,13 @@ class DatabaseSeeder extends Seeder
             User::create($admin);
         }
 
-        $this->call([ServiceSeeder::class,ReviewSeeder::class]);
+       $this->call([ServiceSeeder::class,ReviewSeeder::class]);
+
+       $allServiceIds = Service::pluck('id')->toArray();
+
+        $users = \App\Models\User::all();
+        foreach ($users as $user) {
+            $user->services()->attach($allServiceIds);
+        }
     }
 }
