@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Route;
 // Nyilvános
 Route::post('/login', [AuthController::class, 'login']);
 
+Route::apiResource('/user_public_data', AuthController::class)->only('index');
+
 Route::apiResource('services', ServiceController::class);
 Route::apiResource('customers', CustomerController::class);
 

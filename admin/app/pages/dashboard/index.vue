@@ -67,7 +67,6 @@ const logout = async () => {
             <div class="flex items-center gap-4">
               <div class="hidden md:flex flex-col items-end leading-tight">
                 <span class="text-sm font-semibold text-slate-700">{{ user.user_name }}</span>
-                <span class="text-xs text-slate-500">{{ user.description || 'Adminisztrátor' }}</span>
               </div>
               <button 
                 @click="logout" 

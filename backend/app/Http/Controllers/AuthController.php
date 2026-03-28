@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\UserResource;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage; // Ez a jó a fájlkezeléshez
@@ -12,6 +13,10 @@ use App\Models\User;
 
 class AuthController extends Controller
 {
+    public function index() {
+        return UserResource::collection(User::all());
+    }
+
     public function login(Request $request)
     {
         // 1. Validáljuk a beérkező adatokat
