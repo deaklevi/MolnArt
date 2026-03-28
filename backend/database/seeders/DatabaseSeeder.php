@@ -21,16 +21,19 @@ class DatabaseSeeder extends Seeder
                 'user_name' => 'admin_janos',
                 'password' => Hash::make('titkos123'),
                 'description' => 'Főadminisztrátor',
+                'profile_image' => "/storage/avatars/kep1.jpg"
             ],
             [
                 'user_name' => 'admin_kata',
                 'password' => Hash::make('jelszo456'),
                 'description' => 'Tartalomkezelő',
+                'profile_image' => "/storage/avatars/kep1.jpg"
             ],
             [
                 'user_name' => 'admin_bela',
                 'password' => Hash::make('admin789'),
                 'description' => 'Rendszergazda',
+                'profile_image' => "/storage/avatars/kep1.jpg"
             ],
         ];
 
