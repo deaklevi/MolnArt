@@ -5,7 +5,7 @@ namespace App\Http\Requests;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
-class UpdateServiceRequest extends FormRequest
+class StoreAppointmentRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -23,8 +23,10 @@ class UpdateServiceRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['required','string','max:50'],
-            'time' => ['required','integer','min:1']
+            'appointment_from' => ['required', 'date'],
+            'appointment_to' => ['required', 'date', 'after:appointment_from'],
+            'service' => ['required', 'string', 'max:25'],
+            'customer_id' => ['required', 'exists:customers,id'],
         ];
     }
 }
