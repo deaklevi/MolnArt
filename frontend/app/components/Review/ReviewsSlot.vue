@@ -1,26 +1,39 @@
 <template>
-    <div class="relative overflow-hidden">
-      <div class="animate-scroll-up">
-        <ReviewCard
-          v-for="(review, index) in loopedReviews"
-          :key="`col2-${index}`"
-          :review="review"
-          class="mb-4"
-        />
-      </div>
-    </div>
+    <div class="grid h-[500px] grid-cols-3 gap-4">
+        <div class="relative overflow-hidden">
+          <div class="animate-scroll-up">
+            <ReviewCard
+              v-for="(review, index) in loopedReviews"
+              :key="`col1-${index}`"
+              :review="review"
+              class="mb-4"
+            />
+          </div>
+        </div>
 
-    <div class="relative overflow-hidden">
-      <div class="animate-scroll-down">
-        <ReviewCard
-          v-for="(review, index) in loopedReviews"
-          :key="`col3-${index}`"
-          :review="review"
-          class="mb-4"
-        />
-      </div>
+        <div class="relative overflow-hidden">
+          <div class="animate-scroll-down">
+            <ReviewCard
+              v-for="(review, index) in loopedReviews"
+              :key="`col3-${index}`"
+              :review="review"
+              class="mb-4"
+            />
+          </div>
+        </div>
+
+        <div class="relative overflow-hidden">
+          <div class="animate-scroll-up">
+            <ReviewCard
+              v-for="(review, index) in loopedReviews"
+              :key="`col2-${index}`"
+              :review="review"
+              class="mb-4"
+            />
+          </div>
+        </div>
     </div>
-  
+    
 </template>
 
 <script setup>
@@ -49,10 +62,10 @@ const loopedReviews = computed(() => [...props.reviews, ...props.reviews])
 }
 
 .animate-scroll-down {
-  animation: scrollDown 20s linear infinite;
+  animation: scrollDown 30s linear infinite;
 }
 
 .animate-scroll-up {
-  animation: scrollUp 20s linear infinite;
+  animation: scrollUp 30s linear infinite;
 }
 </style>

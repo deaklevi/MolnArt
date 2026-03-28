@@ -69,17 +69,17 @@
 
     
     
-    <div id="staff" class="py-16 bg-gray-50">
+    <div id="team" class="py-16">
         <h2 class="mb-12 text-center text-3xl font-bold tracking-wide">Csapatunk</h2>
         <WorkerSection :workers="publicUsers?.data ||[]" />
     </div>
 
     <section class="py-16">
-    <h2 class="text-center text-2xl font-bold mb-10">
+    <h2 class="text-center text-2xl font-bold mb-20 mt-10">
       Nézd meg értékeléseinket
     </h2>
 
-    <ReviewsSlot :reviews="reviews" />
+    <ReviewsSlot :reviews="reviews.data" />
   </section>
 
 </template>
@@ -87,24 +87,22 @@
 <script setup>
 import { ref } from 'vue';
 import ReviewsSlot from '~/components/Review/ReviewsSlot.vue';
+import ReviewsCard from '~/components/Review/ReviewCard.vue';
 const isMenuOpen = ref(false)
 
 const config = useRuntimeConfig();
 
 const { data: publicUsers } = await useFetch(`${config.public.apiBase}/api/user_public_data`);
-const reviews = [
-  { name: 'Petrányi Gabi', rating: 5, comment: 'Imádom ezt a szalont! Már belépéskor érezni a kellemes hangulatot.' },
-  { name: 'Anna Kovács', rating: 4, comment: 'Nagyon kedves kiszolgálás és profi munka.' },
-  { name: 'Balázs Tóth', rating: 5, comment: 'A legjobb hely, csak ajánlani tudom!' },
-  { name: 'Eszter Nagy', rating: 3, comment: 'Rendben volt, de lehetne gyorsabb.' },
-  { name: 'Zoltán Kiss', rating: 4, comment: 'Szép környezet és jó hangulat.' }
-]
+const {data: reviews} = await useFetch(`${config.public.apiBase}/api/reviews`);
 
 // const{ data: publicReviews} = await useFetch(`${config.public.apiBase}/api/reviews`)
 
 console.log("asdasda")
 if (publicUsers.value) {
     console.log(publicUsers.value)
+}
+if (reviews.value) {
+    console.log(reviews.value)
 }
 
 
