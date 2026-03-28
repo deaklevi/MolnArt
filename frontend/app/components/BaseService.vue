@@ -1,7 +1,9 @@
 <script setup>
 const props = defineProps({
-    service: Array,
-    required: true,
+  service: {
+    type: Object,
+    required: true
+  }
 })
 </script>
 
