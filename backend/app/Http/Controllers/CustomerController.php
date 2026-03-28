@@ -14,7 +14,7 @@ class CustomerController extends Controller
      */
     public function index()
     {
-        return CustomerResource::collection(Customer::with('user')->get());
+        return CustomerResource::collection(Customer::with('user','appointments')->get());
     }
 
     /**
@@ -23,7 +23,7 @@ class CustomerController extends Controller
     public function store(StoreCustomerRequest $request)
     {
         $customer = Customer::create($request->validated());
-        return new CustomerResource($customer->load(['user']));
+        return new CustomerResource($customer->load(['user','appointments']));
     }
 
     /**
@@ -31,7 +31,7 @@ class CustomerController extends Controller
      */
     public function show(Customer $customer)
     {
-        return new CustomerResource($customer->load['user']);
+        return new CustomerResource($customer->load(['user','appointments']));
     }
 
     /**
@@ -40,7 +40,7 @@ class CustomerController extends Controller
     public function update(UpdateCustomerRequest $request, Customer $customer)
     {
         $customer->update($request->validated());
-        return new CustomerResource($customer->load(['user']));
+        return new CustomerResource($customer->load(['user','appointments']));
     }
 
     /**

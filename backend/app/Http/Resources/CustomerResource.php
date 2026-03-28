@@ -20,8 +20,13 @@ class CustomerResource extends JsonResource
             'email' => $this->email,
             'user' => $this->whenLoaded('user',function(){ 
                 return [
-                    'id' => $this->user->id,
-                    'user_name' => $this->user->name
+                    'id' => $this->id,
+                    'name' => $this->name,
+                    'email' => $this->email,
+                    'phone_number' => $this->phone_number,
+                    'user_id' => $this->user_id,
+                    'user' => new UserResource($this->whenLoaded('user')),
+                    'appointments' => AppointmentResource::collection($this->whenLoaded('appointments')),
                 ];
             })
         ];

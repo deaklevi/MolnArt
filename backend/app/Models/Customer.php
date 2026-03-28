@@ -3,17 +3,23 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Customer extends Model
 {
-    public $timestamps = true;
+
     protected $fillable = [
         'name','email','phone_number','user_id'
     ];
 
     
-    public function user(){
+    public function user()
+    {
         return $this->belongsTo(User::class);
     }
-    
+
+    public function appointments(): HasMany
+    {
+        return $this->hasMany(Appointment::class);
+    }
 }
