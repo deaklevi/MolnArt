@@ -71,7 +71,7 @@
     
     <div id="staff" class="py-16 bg-gray-50">
         <h2 class="mb-12 text-center text-3xl font-bold tracking-wide">Csapatunk</h2>
-        <WorkerSection :workers="publicUsers" />
+        <WorkerSection :workers="publicUsers?.data ||[]" />
     </div>
 
 </template>
@@ -85,28 +85,11 @@ const config = useRuntimeConfig();
 const { data: publicUsers } = await useFetch(`${config.public.apiBase}/api/user_public_data`);
 
 console.log("asdasda")
-console.log(publicUsers.value.data)
+if (publicUsers.value) {
+    console.log(publicUsers.value)
+}
 
-const workers = ref([
-  {
-    id: 1,
-    name: 'Molnár Éva',
-    description: 'Több mint egy évtizedes tapasztalattal a hátam mögött hiszek abban, hogy a haj nem csupán divat, hanem önkifejezés.',
-    imageURL: '/photos/MolnarEva.jpg'
-  },
-  {
-    id: 2,
-    name: 'Kovács János',
-    description: 'A modern férfi frizurák specialistája, a klasszikus borbély technikák mestere.',
-    imageURL: '/photos/MolnarEva.jpg' 
-  },
-   {
-    id: 3,
-    name: 'Varga Judit',
-    description: 'A legújabb hajfestési trendek és technikák szakértője.',
-    imageURL: '/photos/MolnarEva.jpg'
-  }
-]);
+
 
 
 </script>

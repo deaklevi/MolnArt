@@ -20,7 +20,7 @@
             type:Object,
             required: true,
             default: () =>({
-                name: 'Jane Doe',
+                user_name: 'Jane Doe',
                 description: 'Több mint egy évtizedes tapasztalattal a hátam mögött hiszek abban, hogy a haj nem csupán divat, hanem önkifejezés. Szenvedélyem, hogy minden vendégemnek olyan frizurát alkossak, ami kiemeli egyéniségét és magabiztosságot ad neki',
                 imageURL:'/photos/MolnarEva.jpg'
             })

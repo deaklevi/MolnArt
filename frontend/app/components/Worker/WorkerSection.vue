@@ -11,7 +11,7 @@
             </div>
 
             <div v-if="selectedWorker" class="mt-8 p-4 bg-white rounded-lg shadow-md text-center">
-                <h3 class="text-2xl font-bold mb-2">{{ selectedWorker.name }}</h3>
+                <h3 class="text-2xl font-bold mb-2">{{ selectedWorker.user_name }}</h3>
                 <p class="text-gray-700 mb-4">{{ selectedWorker.description }}</p>
                 <button class="bg-[#D0BEAC] text-black font-semibold p-2 rounded-lg w-full max-w-xs mx-auto"> Foglalás most </button>
             </div>
