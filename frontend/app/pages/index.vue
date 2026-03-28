@@ -74,15 +74,33 @@
         <WorkerSection :workers="publicUsers?.data ||[]" />
     </div>
 
+    <section class="py-16">
+    <h2 class="text-center text-2xl font-bold mb-10">
+      Nézd meg értékeléseinket
+    </h2>
+
+    <ReviewsSlot :reviews="reviews" />
+  </section>
+
 </template>
 
 <script setup>
 import { ref } from 'vue';
+import ReviewsSlot from '~/components/Review/ReviewsSlot.vue';
 const isMenuOpen = ref(false)
 
 const config = useRuntimeConfig();
 
 const { data: publicUsers } = await useFetch(`${config.public.apiBase}/api/user_public_data`);
+const reviews = [
+  { name: 'Petrányi Gabi', rating: 5, comment: 'Imádom ezt a szalont! Már belépéskor érezni a kellemes hangulatot.' },
+  { name: 'Anna Kovács', rating: 4, comment: 'Nagyon kedves kiszolgálás és profi munka.' },
+  { name: 'Balázs Tóth', rating: 5, comment: 'A legjobb hely, csak ajánlani tudom!' },
+  { name: 'Eszter Nagy', rating: 3, comment: 'Rendben volt, de lehetne gyorsabb.' },
+  { name: 'Zoltán Kiss', rating: 4, comment: 'Szép környezet és jó hangulat.' }
+]
+
+// const{ data: publicReviews} = await useFetch(`${config.public.apiBase}/api/reviews`)
 
 console.log("asdasda")
 if (publicUsers.value) {
