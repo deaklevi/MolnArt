@@ -7,11 +7,18 @@
           Válassz szakembert
         </h1>
         <div class="flex justify-center gap-8 md:gap-12 flex-wrap">
-          <div v-for="worker in publicUsers?.data" :key="worker.id" @click="selectWorker(worker)" class="flex flex-col items-center cursor-pointer group">
-            <div class="relative rounded-full p-1 transition-all duration-500" :class="selectedWorker?.id === worker.id ? 'ring-4 ring-purple-900/30' : 'hover:ring-2 hover:ring-stone-200'">
-              <img :src="`${config.public.apiBase}${worker.profile_image}`" class="w-20 h-20 md:w-24 md:h-24 rounded-full object-cover shadow-md transition-transform duration-500" :class="selectedWorker?.id === worker.id ? 'scale-100' : 'grayscale-[40%] group-hover:grayscale-0'" />
+          <div v-for="worker in publicUsers?.data" 
+               :key="worker.id" 
+               @click="selectWorker(worker)" 
+               class="flex flex-col items-center cursor-pointer group">
+            <div class="relative rounded-full p-1 transition-all duration-500" 
+                 :class="selectedWorker?.id === worker.id ? 'ring-4 ring-purple-900/30' : 'hover:ring-2 hover:ring-stone-200'">
+              <img :src="`${config.public.apiBase}${worker.profile_image}`" 
+                   class="w-20 h-20 md:w-24 md:h-24 rounded-full object-cover shadow-md transition-transform duration-500" 
+                   :class="selectedWorker?.id === worker.id ? 'scale-100' : 'grayscale-[40%] group-hover:grayscale-0'" />
             </div>
-            <span class="mt-3 text-sm font-bold uppercase tracking-tight transition-colors" :class="selectedWorker?.id === worker.id ? 'text-purple-900' : 'text-gray-500'">
+            <span class="mt-3 text-sm font-bold uppercase tracking-tight transition-colors" 
+                  :class="selectedWorker?.id === worker.id ? 'text-purple-900' : 'text-gray-500'">
               {{ worker.user_name }}
             </span>
           </div>
@@ -29,7 +36,8 @@
         </div>
 
         <div v-if="selectedWorker?.services?.length" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div v-for="service in selectedWorker.services" :key="service.id" class="bg-white p-6 border border-stone-100 rounded-xl shadow-sm hover:shadow-md transition-all border-l-4 border-l-transparent hover:border-l-purple-900 flex flex-col justify-between">
+          <div v-for="service in selectedWorker.services" :key="service.id" 
+               class="bg-white p-6 border border-stone-100 rounded-xl shadow-sm hover:shadow-md transition-all border-l-4 border-l-transparent hover:border-l-purple-900 flex flex-col justify-between">
             <div>
               <div class="flex justify-between items-start mb-3">
                 <h3 class="font-bold text-xl text-gray-900 leading-snug">{{ service.name }}</h3>
@@ -41,10 +49,8 @@
                 Professzionális kivitelezés prémium alapanyagokkal.
               </p>
             </div>
-            <button 
-              @click="addToCart(service)"
-              class="w-full py-3 bg-gray-900 text-white hover:bg-purple-900 transition-colors uppercase text-xs font-black tracking-widest rounded-lg"
-            >
+            <button @click="addToCart(service)" 
+                    class="w-full py-3 bg-gray-900 text-white hover:bg-purple-900 transition-colors uppercase text-xs font-black tracking-widest rounded-lg">
               Hozzáadás a kosárhoz
             </button>
           </div>
@@ -84,8 +90,9 @@
             </div>
           </div>
 
-          <button class="w-full py-4 bg-purple-900 text-white hover:bg-purple-800 transition-all uppercase text-sm font-black tracking-widest rounded-xl shadow-lg">
-            Időpont foglalása
+          <button @click="proceedToCalendar" 
+                  class="w-full py-4 bg-purple-900 text-white hover:bg-purple-800 transition-all uppercase text-sm font-black tracking-widest rounded-xl shadow-lg">
+            Időpont kiválasztása
           </button>
         </div>
 
@@ -94,7 +101,7 @@
           <h2 class="text-3xl font-serif text-gray-950 mb-4">{{ selectedWorker.user_name }}</h2>
           <div class="h-1 w-12 bg-purple-900 mb-6"></div>
           <p class="text-stone-600 leading-relaxed italic text-sm">
-            "{{ selectedWorker.description }}"
+            "{{ selectedWorker.description || 'Várlak szeretettel egy professzionális kezelésre!' }}"
           </p>
         </div>
 
@@ -129,8 +136,9 @@
 import { ref, computed, watchEffect } from 'vue';
 
 const config = useRuntimeConfig();
+const router = useRouter();
 
-// Adatok lekérése
+// API adatok lekérése
 const { data: publicUsers } = await useAsyncData('users', () => $fetch(`${config.public.apiBase}/api/user_public_data`));
 
 const selectedWorker = ref(null);
@@ -141,19 +149,14 @@ const schedule = {
   'Csütörtök': '08:00 - 19:00', 'Péntek': '08:00 - 19:00', 'Szombat': 'Zárva', 'Vasárnap': 'Zárva'
 };
 
-// --- KOSÁR LOGIKA MENNYISÉGGEL ---
+// --- KOSÁR LOGIKA ---
 
 const addToCart = (service) => {
   const existingItem = cart.value.find(item => item.id === service.id);
-  
   if (existingItem) {
     existingItem.quantity += 1;
   } else {
-    // Új tétel hozzáadása 1-es mennyiséggel
-    cart.value.push({
-      ...service,
-      quantity: 1
-    });
+    cart.value.push({ ...service, quantity: 1 });
   }
 };
 
@@ -161,11 +164,8 @@ const updateQuantity = (id, change) => {
   const item = cart.value.find(i => i.id === id);
   if (item) {
     const newQty = item.quantity + change;
-    if (newQty > 0) {
-      item.quantity = newQty;
-    } else {
-      removeFromCart(id);
-    }
+    if (newQty > 0) item.quantity = newQty;
+    else removeFromCart(id);
   }
 };
 
@@ -174,15 +174,37 @@ const removeFromCart = (id) => {
 };
 
 const totalTime = computed(() => {
-  return cart.value.reduce((acc, curr) => acc + (curr.time * curr.quantity), 0);
+  return cart.value.reduce((acc, curr) => {
+    const minutes = Number(curr.time) || 0;
+    return acc + (minutes * curr.quantity);
+  }, 0);
 });
 
-// Szakember váltás
+// Szakember váltáskor ürítjük a kosarat
 const selectWorker = (worker) => {
   selectedWorker.value = worker;
   cart.value = []; 
 };
 
+// Átirányítás a naptárra az adatok mentésével
+const proceedToCalendar = () => {
+  if (cart.value.length === 0 || !selectedWorker.value) return;
+
+  const bookingState = {
+    worker: {
+      id: selectedWorker.value.id,
+      name: selectedWorker.value.user_name,
+      image: selectedWorker.value.profile_image
+    },
+    services: cart.value.map(s => ({ ...s, time: Number(s.time) })),
+    totalDuration: Number(totalTime.value)
+  };
+  
+  sessionStorage.setItem('temp_booking', JSON.stringify(bookingState));
+  router.push('/booking/calendar');
+};
+
+// Alapértelmezett szakember beállítása betöltéskor
 watchEffect(() => {
   if (publicUsers.value?.data && !selectedWorker.value) {
     selectedWorker.value = publicUsers.value.data[0];
