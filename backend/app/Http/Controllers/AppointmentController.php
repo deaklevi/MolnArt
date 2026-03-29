@@ -47,9 +47,15 @@ class AppointmentController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Appointment $appointment)
+    public function destroy($id)
     {
+        $appointment = Appointment::findOrFail($id);
+    
+        // Opcionális: Ellenőrizd, hogy a bejelentkezett user törölheti-e
+        // if ($appointment->customer->user_id !== auth()->id()) { return response(status: 403); }
+
         $appointment->delete();
-        return response()->noContent();
+
+        return response()->json(['message' => 'Időpont törölve']);
     }
 }

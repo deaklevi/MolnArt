@@ -13,14 +13,14 @@ Route::post('/login', [AuthController::class, 'login']);
 
 Route::apiResource('/user_public_data', AuthController::class)->only('index');
 
+Route::apiResource('appointments', AppointmentController::class);
+
 Route::apiResource('services', ServiceController::class);
 Route::apiResource('reviews', ReviewController::class);
 Route::apiResource('customers', CustomerController::class);
 
 // Védett
 Route::middleware('auth:sanctum')->group(function () {
-
-    Route::apiResource('appointments', AppointmentController::class);
     
     Route::post('/user/update', [AuthController::class, 'updateProfile']);
 
