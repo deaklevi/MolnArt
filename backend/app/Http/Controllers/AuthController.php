@@ -14,7 +14,13 @@ use App\Models\User;
 class AuthController extends Controller
 {
     public function index() {
-        return UserResource::collection(User::with('services')->get());
+        // Betöltjük a szolgáltatásokat ÉS a foglalásokat az ügyfelekkel együtt
+        $users = User::with([
+            'services', 
+            'appointments.customer'
+        ])->get();
+
+        return UserResource::collection($users);
     }
 
     public function login(Request $request)
