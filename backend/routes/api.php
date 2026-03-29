@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\Route;
 // Nyilvános
 Route::post('/login', [AuthController::class, 'login']);
 
+Route::post('/appointments', [AppointmentController::class, 'store']);
+
 Route::apiResource('/user_public_data', AuthController::class)->only('index');
 
 Route::apiResource('appointments', AppointmentController::class);
