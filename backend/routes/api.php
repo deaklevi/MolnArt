@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\ReviewController;
@@ -18,6 +19,8 @@ Route::apiResource('customers', CustomerController::class);
 
 // Védett
 Route::middleware('auth:sanctum')->group(function () {
+
+    Route::apiResource('appointments', AppointmentController::class);
     
     Route::post('/user/update', [AuthController::class, 'updateProfile']);
 

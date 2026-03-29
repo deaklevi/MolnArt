@@ -42,7 +42,12 @@ class DatabaseSeeder extends Seeder
             User::create($admin);
         }
 
-       $this->call([ServiceSeeder::class,ReviewSeeder::class]);
+       $this->call([
+            ServiceSeeder::class,
+            ReviewSeeder::class,
+            CustomerSeeder::class,
+            AppointmentSeeder::class,
+        ]);
 
        $allServiceIds = Service::pluck('id')->toArray();
 

@@ -6,6 +6,7 @@ namespace App\Models;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -44,5 +45,17 @@ class User extends Authenticatable
     {
         // A 'withTimestamps' azért kell, ha látni akarjuk, mikor rendelték hozzá
         return $this->belongsToMany(Service::class);
+    }
+
+    public function appointments(): HasManyThrough
+    {
+        return $this->hasManyThrough(
+            Appointment::class, 
+            Customer::class,
+            'user_id',     // Foreign key a customers táblán
+            'customer_id', // Foreign key az appointments táblán
+            'id',          // Local key a users táblán
+            'id'           // Local key a customers táblán
+        );
     }
 }
