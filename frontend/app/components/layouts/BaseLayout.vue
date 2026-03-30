@@ -1,6 +1,5 @@
 <template>
-    <LayoutsBaseHeader />
-    <main class="mx-auto max-w-7xl">
+    <main class="max-w-7xl mx-auto">
         <slot />
     </main>
 </template>
