@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <script setup>
 const config = useRuntimeConfig();
 
@@ -6,9 +7,6 @@ const { data: publicUsers } = await useAsyncData('users', () => $fetch(`${config
 const { data: servicesData } = await useAsyncData('services', () => $fetch(`${config.public.apiBase}/api/services`));
 const {data: reviews} = await useFetch(`${config.public.apiBase}/api/reviews`);
 import ReviewsSlot from '~/components/Review/ReviewsSlot.vue';
-import ReviewsCard from '~/components/Review/ReviewCard.vue';
-import BaseLayout from '~/components/Layouts/BaseLayout.vue';
-  
 </script>
 
 <template>
@@ -52,3 +50,16 @@ import BaseLayout from '~/components/Layouts/BaseLayout.vue';
     </LayoutsBaseLayout>
   </div>
 </template>
+=======
+<template>
+    <LayoutsBaseLayout>
+        <h1 class="text-3xl font-bold underline">
+            Hello world!
+        </h1>
+    </LayoutsBaseLayout>
+</template>
+
+<script>
+
+</script>
+>>>>>>> 9c00869fac303a97c058f4480a66c501c93583d7
