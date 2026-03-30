@@ -5,6 +5,8 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -19,31 +21,41 @@ class User extends Authenticatable
      * @var list<string>
      */
     protected $fillable = [
-        'name',
-        'email',
+        'user_name',
         'password',
+        'description',
+        'profile_image',
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var list<string>
-     */
-    protected $hidden = [
-        'password',
-        'remember_token',
-    ];
+    // Ezzel mondjuk meg a Laravelnek, hogy ne az emailt keresse login-kor
+    public function findForPassport($username) {
+        return $this->where('user_name', $username)->first();
+    }
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
-    protected function casts(): array
+    public function customers(): HasMany
     {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-        ];
+        return $this->hasMany(Customer::class);
+    }
+    public function reviews(): HasMany
+    {
+        return $this->hasMany(Review::class);
+    }
+
+    public function services()
+    {
+        // A 'withTimestamps' azért kell, ha látni akarjuk, mikor rendelték hozzá
+        return $this->belongsToMany(Service::class);
+    }
+
+    public function appointments(): HasManyThrough
+    {
+        return $this->hasManyThrough(
+            Appointment::class, 
+            Customer::class,
+            'user_id',     // Foreign key a customers táblán
+            'customer_id', // Foreign key az appointments táblán
+            'id',          // Local key a users táblán
+            'id'           // Local key a customers táblán
+        );
     }
 }
