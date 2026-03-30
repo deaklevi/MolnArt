@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AppointmentController;
+use App\Http\Controllers\Auth\GoogleController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\ReviewController;
@@ -9,6 +10,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 // Nyilvános
+Route::get('/auth/google/redirect', [GoogleController::class, 'redirectToGoogle']);
+Route::get('/auth/google/callback', [App\Http\Controllers\Auth\GoogleController::class, 'handleGoogleCallback']);
+
 Route::post('/login', [AuthController::class, 'login']);
 
 Route::post('/appointments', [AppointmentController::class, 'store']);

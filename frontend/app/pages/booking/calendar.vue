@@ -1,8 +1,30 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { useRoute, useRouter } from 'vue-router'; // Add hozzá a useRoute-ot
 
 const config = useRuntimeConfig();
 const router = useRouter();
+
+const route = useRoute(); // Ez kell az URL paraméterekhez
+
+const loginWithGoogle = () => {
+  if (!selectedSlot.value.start) {
+    errorMessage.value = "Kérlek, előbb válassz egy időpontot!";
+    return;
+  }
+  
+  // Elmentjük, hogy mit választott a júzer, mielőtt elmegy a Google-höz
+  const slotToSave = {
+    start: selectedSlot.value.start,
+    end: selectedSlot.value.end,
+    display: selectedSlot.value.display
+  };
+  
+  sessionStorage.setItem('last_selected_slot', JSON.stringify(slotToSave));
+  
+  // Átirányítás a Laravel-re
+  window.location.href = `${config.public.apiBase}/api/auth/google/redirect`;
+};
 
 // --- Állapotok ---
 const bookingInfo = ref(null);
@@ -17,7 +39,7 @@ const isSubmitting = ref(false);
 const bookingSuccess = ref(false); // Sikeres-e a foglalás
 const errorMessage = ref("");      // Aktuális hibaüzenet szövege
 
-const selectedSlot = ref({ start: '', end: '' });
+const selectedSlot = ref({ start: '', end: '', display: '' });
 const customerForm = ref({ name: '', email: '', phone_number: '' });
 
 // --- Segédfüggvények ---
@@ -40,20 +62,44 @@ const updateLayout = () => {
 onMounted(async () => {
   updateLayout();
   window.addEventListener('resize', updateLayout);
+  
+  // 1. Alapadatok betöltése
   const saved = sessionStorage.getItem('temp_booking');
-  if (!saved) return router.push('/booking');
-  const parsed = JSON.parse(saved);
-  parsed.totalDuration = Number(parsed.totalDuration) || 30;
-  bookingInfo.value = parsed;
+  if (!saved) {
+    // Csak akkor dobunk vissza, ha tényleg semmi nincs a kosárban
+    return router.push('/booking'); 
+  }
+  bookingInfo.value = JSON.parse(saved);
 
+  // 2. Időpontok betöltése az API-ból
   try {
     const res = await $fetch(`${config.public.apiBase}/api/user_public_data`);
     const worker = res.data.find(u => u.id === bookingInfo.value.worker.id);
     appointments.value = worker?.appointments || [];
   } catch (err) {
-    console.error("Hiba:", err);
+    console.error("Hiba az időpontoknál:", err);
   } finally {
     loading.value = false;
+  }
+
+  // 3. Google visszatérés és Modal nyitás
+  const googleData = sessionStorage.getItem('google_user_data');
+  const lastSlot = sessionStorage.getItem('last_selected_slot');
+
+  if (googleData && lastSlot) {
+    const slot = JSON.parse(lastSlot);
+    const user = JSON.parse(googleData);
+    
+    selectedSlot.value = slot;
+    customerForm.value.name = user.name;
+    customerForm.value.email = user.email;
+
+    // Megnyitjuk a modalt az adatokkal
+    showModal.value = true;
+
+    // Takarítás, hogy frissítésnél ne ugorjon fel újra
+    sessionStorage.removeItem('google_user_data');
+    sessionStorage.removeItem('last_selected_slot');
   }
 });
 
@@ -136,7 +182,9 @@ const confirmBooking = async () => {
 
   try {
     const payload = {
-      ...customerForm.value,
+      name: customerForm.value.name,
+      email: customerForm.value.email,
+      phone_number: customerForm.value.phone_number,
       worker_id: bookingInfo.value.worker.id,
       service: bookingInfo.value.services.map(s => `${s.name} (${s.quantity}x)`).join(', '),
       start: selectedSlot.value.start,
@@ -145,22 +193,28 @@ const confirmBooking = async () => {
 
     await $fetch(`${config.public.apiBase}/api/appointments`, {
       method: 'POST',
-      headers: { 'Accept': 'application/json' },
+      headers: { 
+        'Accept': 'application/json',
+        'Content-Type': 'application/json' 
+      },
       body: payload
     });
 
-    // SIKER!
     bookingSuccess.value = true;
-    sessionStorage.removeItem('temp_booking');
+    sessionStorage.removeItem('temp_booking'); // Csak siker esetén ürítjük!
     
-    // 2 másodperc múlva visszairányítunk a főoldalra
     setTimeout(() => {
       router.push('/');
     }, 2500);
 
   } catch (err) {
-    const errors = err.data?.errors;
-    errorMessage.value = errors ? Object.values(errors).flat()[0] : "Szerver hiba történt. Próbáld újra!";
+    console.error("Szerver hiba:", err);
+    // Ha a Laravel 422-t küld (validációs hiba), írjuk ki a konkrét okot
+    if (err.data?.errors) {
+      errorMessage.value = Object.values(err.data.errors).flat()[0];
+    } else {
+      errorMessage.value = err.data?.message || "Hiba történt a mentés során. Próbáld újra!";
+    }
   } finally {
     isSubmitting.value = false;
   }
@@ -257,9 +311,21 @@ const calculateBusyStyle = (app) => {
 
         <div v-else>
             <h3 class="text-2xl font-serif text-stone-900 mb-2 mt-4">Adatok megadása</h3>
-            <p class="text-[11px] font-bold text-purple-900 uppercase tracking-[0.2em] mb-8 border-b border-stone-100 pb-4">
+            <p class="text-[11px] font-bold text-purple-900 uppercase tracking-[0.2em] mb-4 border-b border-stone-100 pb-4">
               {{ selectedSlot.display }}
             </p>
+          
+            <div class="mb-6">
+              <button @click="loginWithGoogle" class="w-full flex items-center justify-center gap-3 p-4 bg-stone-50 border border-stone-200 rounded-2xl hover:bg-stone-100 transition-all font-bold text-stone-700 shadow-sm group">
+                <img src="https://www.svgrepo.com/show/355037/google.svg" class="w-5 h-5 group-hover:scale-110 transition-transform" alt="Google logo">
+                Kitöltés Google fiókkal
+              </button>
+              <div class="relative flex items-center py-4">
+                <div class="flex-grow border-t border-stone-100"></div>
+                <span class="flex-shrink mx-4 text-[9px] font-black text-stone-300 uppercase tracking-widest">vagy kézzel</span>
+                <div class="flex-grow border-t border-stone-100"></div>
+              </div>
+            </div>
 
             <div class="space-y-4">
               <input v-model="customerForm.name" placeholder="Teljes név" class="w-full p-4 bg-stone-50 border border-stone-200 rounded-2xl outline-none focus:ring-2 focus:ring-purple-900/20 font-medium transition-all">
