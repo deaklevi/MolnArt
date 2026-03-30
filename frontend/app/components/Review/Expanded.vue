@@ -1,5 +1,5 @@
 <template>
-<div class="bg-white rounded-lg shadow-lg p-6 flex-gap-3 items-start w-full h-full">
+<div class="bg-white rounded-lg shadow-xl  p-6 flex-gap-3 items-start w-full h-full">
     <div class="w-8 h-8 md:h-12 md:w-12 lg:h-14 lg:w-14 rounded-full bg-purple-500 flex items-center justify-center text-white font-bold overflow-hidden">
         <span v-if="!review.profile_image">
           {{ review.name.charAt(0) }}

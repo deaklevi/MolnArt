@@ -17,7 +17,7 @@
             <p class="text-gray-700 mb-4">{{ selectedWorker.description }}</p>
         </div>
 
-        <div class="mt-10 mx-auto">
+        <div class="mt-10 h-full">
             <ReviewExpanded :review="reviews.data[0]" />
         </div>
     </div>
