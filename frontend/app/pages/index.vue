@@ -7,12 +7,14 @@ const { data: servicesData } = await useAsyncData('services', () => $fetch(`${co
 const {data: reviews} = await useFetch(`${config.public.apiBase}/api/reviews`);
 import ReviewsSlot from '~/components/Review/ReviewsSlot.vue';
 import ReviewsCard from '~/components/Review/ReviewCard.vue';
+import BaseLayout from '~/components/Layouts/BaseLayout.vue';
   
 </script>
 
 <template>
   <div> 
     <BaseHeader />
+    <LayoutsBaseLayout>
     <BaseGallery />
 
     <div class="container mx-auto px-4 py-8">
@@ -45,5 +47,8 @@ import ReviewsCard from '~/components/Review/ReviewCard.vue';
     <ReviewsSlot :reviews="reviews.data" />
     </section>
     <BaseAboutUs/>
+
+
+    </LayoutsBaseLayout>
   </div>
 </template>
