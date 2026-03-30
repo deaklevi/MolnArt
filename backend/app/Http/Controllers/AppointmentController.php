@@ -107,10 +107,110 @@ class AppointmentController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateAppointmentRequest $request, Appointment $appointment)
+    public function update(Request $request, $id)
     {
-        $appointment->update($request->validated());
-        return new AppointmentResource($appointment->load('customer'));
+        $appointment = Appointment::findOrFail($id);
+
+        // Validáció
+        $validated = $request->validate([
+            'name' => 'required|string|max:100',
+            'email' => 'nullable|email|max:100',
+            'phone_number' => 'nullable|string|max:20',
+            'service' => 'required|string',
+            'appointment_from' => 'required|date',
+            'appointment_to' => 'required|date',
+        ]);
+
+        // 1. Foglalás adatainak frissítése
+        $appointment->update([
+            'service' => $validated['service'],
+            'appointment_from' => $validated['appointment_from'],
+            'appointment_to' => $validated['appointment_to'],
+        ]);
+
+        // 2. Kapcsolódó vendég (Customer) adatainak frissítése
+        if ($appointment->customer) {
+            $appointment->customer->update([
+                'name' => $validated['name'],
+                'email' => $validated['email'],
+                'phone_number' => $validated['phone_number'],
+            ]);
+        }
+
+        return response()->json([
+            'message' => 'Időpont és vendég adatai sikeresen frissítve!',
+            'data' => $appointment->load('customer')
+        ]);
+    }
+
+    private function saveAppointment(Request $request, $id = null)
+    {
+        try {
+            $validated = $request->validate([
+                'name' => 'required|string|max:100',
+                'email' => 'nullable|email|max:100',
+                'phone_number' => 'nullable|string|max:20',
+                'service' => 'required|string',
+                'appointment_from' => 'required',
+                'appointment_to' => 'required',
+                'worker_id' => 'nullable|exists:users,id' // Új foglaláshoz kellhet
+            ]);
+    
+            $start = \Carbon\Carbon::parse($validated['appointment_from']);
+            $end = \Carbon\Carbon::parse($validated['appointment_to']);
+    
+            // --- ÜTKÖZÉSVIZSGÁLAT ---
+            $query = \App\Models\Appointment::where(function ($q) use ($start, $end) {
+                $q->where('appointment_from', '<', $end)
+                  ->where('appointment_to', '>', $start);
+            });
+    
+            // Ha szerkesztünk, a saját ID-nkat ne vegye ütközésnek
+            if ($id) {
+                $query->where('id', '!=', $id);
+            }
+    
+            if ($query->exists()) {
+                return response()->json(['message' => 'Ez az időpont ütközik egy másik foglalással!'], 422);
+            }
+    
+            // --- MENTÉS VAGY LÉTREHOZÁS ---
+            if ($id) {
+                $appointment = \App\Models\Appointment::findOrFail($id);
+                $appointment->update([
+                    'service' => $validated['service'],
+                    'appointment_from' => $start,
+                    'appointment_to' => $end,
+                ]);
+                $customer = $appointment->customer;
+            } else {
+                // Új vendég kezelése (vagy meglévő keresése email alapján)
+                $customer = \App\Models\Customer::firstOrCreate(
+                    ['email' => $validated['email']],
+                    ['name' => $validated['name'], 'phone_number' => $validated['phone_number']]
+                );
+    
+                $appointment = \App\Models\Appointment::create([
+                    'service' => $validated['service'],
+                    'appointment_from' => $start,
+                    'appointment_to' => $end,
+                    'customer_id' => $customer->id
+                ]);
+            }
+    
+            // Vendég adatok frissítése
+            if ($customer) {
+                $customer->update([
+                    'name' => $validated['name'],
+                    'phone_number' => $validated['phone_number'],
+                ]);
+            }
+    
+            return response()->json(['message' => 'Sikeres mentés!', 'data' => $appointment->load('customer')]);
+    
+        } catch (\Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 500);
+        }
     }
 
     /**
