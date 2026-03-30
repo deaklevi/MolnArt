@@ -7,8 +7,11 @@ use App\Http\Requests\StoreAppointmentRequest;
 use App\Http\Requests\UpdateAppointmentRequest;
 use App\Http\Resources\AppointmentResource;
 use App\Http\Resources\ReviewResource;
+use App\Mail\AppointmentBooked;
 use App\Models\Customer;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 
 class AppointmentController extends Controller
 {
@@ -27,53 +30,70 @@ class AppointmentController extends Controller
 
     public function store(Request $request) 
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:25',
-            'email' => 'required|email|max:45',
-            'phone_number' => 'required|string|max:25',
-            'worker_id' => 'required|exists:users,id',
-            'service' => 'required|string',
-            'start' => 'required|date',
-            'end' => 'required|date',
-        ]);
-    
-        $start = \Carbon\Carbon::parse($validated['start']);
-        $end = \Carbon\Carbon::parse($validated['end']);
-    
-        // --- EXTRA: Ütközés ellenőrzése ---
-        $exists = Appointment::where('customer_id', '!=', 0) // Csak egy példa szűrés
-            ->where(function ($query) use ($start, $end) {
-                $query->whereBetween('appointment_from', [$start, $end])
-                      ->orWhereBetween('appointment_to', [$start, $end]);
-            })->exists();
-    
-        if ($exists) {
-            return response()->json(['message' => 'Ez az időpont már foglalt!'], 422);
+        try {
+            $validated = $request->validate([
+                'name' => 'required|string|max:100',
+                'email' => 'required|email|max:100',
+                'phone_number' => 'required|string|max:20',
+                'worker_id' => 'required|exists:users,id',
+                'service' => 'required|string',
+                'start' => 'required|date',
+                'end' => 'required|date',
+            ]);
+
+            $start = \Carbon\Carbon::parse($validated['start']);
+            $end = \Carbon\Carbon::parse($validated['end']);
+
+            // Ütközésvizsgálat
+            $exists = Appointment::where('appointment_from', '<', $end)
+                                 ->where('appointment_to', '>', $start)
+                                 ->exists();
+
+            if ($exists) {
+                return response()->json(['message' => 'Ez az időpont időközben foglalt lett.'], 422);
+            }
+
+            // Customer létrehozás tranzakcióbiztosan
+            $customer = Customer::updateOrCreate(
+                ['email' => $validated['email']],
+                [
+                    'name' => $validated['name'],
+                    'phone_number' => $validated['phone_number'],
+                    'user_id' => $validated['worker_id']
+                ]
+            );
+
+            $appointment = Appointment::create([
+                'appointment_from' => $start,
+                'appointment_to' => $end,
+                'service' => $validated['service'],
+                'customer_id' => $customer->id,
+            ]);
+
+            $worker = \App\Models\User::find($validated['worker_id']);
+
+            $mailData = [
+                'name'        => $customer->name,
+                'service'     => $appointment->service,
+                'start'       => $start->format('Y-m-d H:i'),
+                'worker_name' => $worker ? $worker->user_name : 'Szakemberünk', // ITT VOLT A HIBA: user_name kell!
+            ];
+
+            // Email küldés - ha ez elszáll, a foglalás még megmarad!
+            try {
+                Mail::to($customer->email)->send(new \App\Mail\AppointmentBooked($mailData ));
+            } catch (\Exception $mailEx) {
+                Log::warning("Email küldési hiba: " . $mailEx->getMessage());
+            }
+
+            return response()->json(['message' => 'Sikeres foglalás!', 'data' => $appointment], 201);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json(['errors' => $e->errors()], 422);
+        } catch (\Exception $e) {
+            Log::error("Súlyos foglalási hiba: " . $e->getMessage());
+            return response()->json(['message' => 'Belső szerverhiba történt.'], 500);
         }
-        // ---------------------------------
-    
-        // 1. Customer kezelése
-        $customer = Customer::firstOrCreate(
-            ['email' => $validated['email']],
-            [
-                'name' => $validated['name'],
-                'phone_number' => $validated['phone_number'],
-                'user_id' => $validated['worker_id']
-            ]
-        );
-    
-        // 2. Foglalás mentése
-        $appointment = Appointment::create([
-            'appointment_from' => $start,
-            'appointment_to' => $end,
-            'service' => $validated['service'],
-            'customer_id' => $customer->id,
-        ]);
-    
-        return response()->json([
-            'message' => 'Sikeres foglalás!', 
-            'data' => $appointment
-        ], 201);
     }
 
     /**
