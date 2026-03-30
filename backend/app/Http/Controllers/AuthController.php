@@ -18,7 +18,8 @@ class AuthController extends Controller
         $users = User::with([
             'services', 
             'appointments.customer',
-            'reviews'
+            'reviews',
+            'customers'
         ])->get();
 
         return UserResource::collection($users);
