@@ -51,3 +51,15 @@ const {data: reviews} = await useFetch(`${config.public.apiBase}/api/reviews`);
     </LayoutsBaseLayout>
   </div>
 </template>
+=======
+<template>
+    <LayoutsBaseLayout>
+        <h1 class="text-3xl font-bold underline">
+            Hello world!
+        </h1>
+    </LayoutsBaseLayout>
+</template>
+
+<script>
+
+</script>
