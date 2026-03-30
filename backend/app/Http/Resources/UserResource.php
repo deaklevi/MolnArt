@@ -22,6 +22,7 @@ class UserResource extends JsonResource
           'services' => ServiceResource::collection($this->whenLoaded('services')),
           'reviews' => ReviewResource::collection($this->whenLoaded('reviews')),
           'customers' => CustomerResource::collection($this->whenLoaded('customers')),
+          'appointments' => AppointmentResource::collection($this->whenLoaded('appointments')),
         ];
     }
 }

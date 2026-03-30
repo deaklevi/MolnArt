@@ -4,11 +4,17 @@ const config = useRuntimeConfig();
 // Adatok lekérése (useAsyncData-val stabilabb SSR alatt)
 const { data: publicUsers } = await useAsyncData('users', () => $fetch(`${config.public.apiBase}/api/user_public_data`));
 const { data: servicesData } = await useAsyncData('services', () => $fetch(`${config.public.apiBase}/api/services`));
+const {data: reviews} = await useFetch(`${config.public.apiBase}/api/reviews`);
+import ReviewsSlot from '~/components/Review/ReviewsSlot.vue';
+import ReviewsCard from '~/components/Review/ReviewCard.vue';
+import BaseLayout from '~/components/Layouts/BaseLayout.vue';
+  
 </script>
 
 <template>
   <div> 
     <BaseHeader />
+    <LayoutsBaseLayout>
     <BaseGallery />
 
     <div class="container mx-auto px-4 py-8">
@@ -33,5 +39,16 @@ const { data: servicesData } = await useAsyncData('services', () => $fetch(`${co
         <h2 class="mb-12 text-center text-4xl font-serif tracking-wide uppercase">Csapatunk</h2>
         <WorkerSection :workers="publicUsers?.data || []" />
     </div>
+    
+    <section class="py-16">
+    <h2 class="text-center text-2xl font-bold mb-20 mt-10">
+      Nézd meg értékeléseinket
+    </h2>
+    <ReviewsSlot :reviews="reviews.data" />
+    </section>
+    <BaseAboutUs/>
+
+
+    </LayoutsBaseLayout>
   </div>
 </template>

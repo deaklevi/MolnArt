@@ -1,7 +1,9 @@
 <?php
 
+use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\ServiceController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -9,9 +11,14 @@ use Illuminate\Support\Facades\Route;
 // Nyilvános
 Route::post('/login', [AuthController::class, 'login']);
 
+Route::post('/appointments', [AppointmentController::class, 'store']);
+
 Route::apiResource('/user_public_data', AuthController::class)->only('index');
 
+Route::apiResource('appointments', AppointmentController::class);
+
 Route::apiResource('services', ServiceController::class);
+Route::apiResource('reviews', ReviewController::class);
 Route::apiResource('customers', CustomerController::class);
 
 // Védett

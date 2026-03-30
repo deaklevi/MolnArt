@@ -7,13 +7,17 @@ use Illuminate\Foundation\Configuration\Middleware;
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
         web: __DIR__.'/../routes/web.php',
-        api: __DIR__.'/../routes/api.php', // <--- EZT A SORT ADD HOZZÁ!
+        api: __DIR__.'/../routes/api.php',
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        // Ez már jó, hagyjuk meg:
-        $middleware->statefulApi();
+        // A statefulApi() mellé (vagy helyett) hozzáadjuk a kivételt:
+        $middleware->statefulApi(); 
+
+        $middleware->validateCsrfTokens(except: [
+            'api/*', // Ez felszabadítja a vendég foglalást a CSRF kényszer alól
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
