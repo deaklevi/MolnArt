@@ -17,7 +17,8 @@ class AuthController extends Controller
         // Betöltjük a szolgáltatásokat ÉS a foglalásokat az ügyfelekkel együtt
         $users = User::with([
             'services', 
-            'appointments.customer'
+            'appointments.customer',
+            'reviews'
         ])->get();
 
         return UserResource::collection($users);
