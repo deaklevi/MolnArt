@@ -1,6 +1,8 @@
 <template>
     <div class="grid h-[500px] grid-cols-3 gap-4">
-        <div class="relative overflow-hidden">
+      <div class="relative overflow-hidden">
+          <div class="pointer-events-none absolute top-0 left-0 w-full h-16 bg-gradient-to-b from-white to-transparent z-10"></div>
+          <div class="pointer-events-none absolute bottom-0 left-0 w-full h-16 bg-gradient-to-t from-white to-transparent z-10"></div>
           <div class="animate-scroll-up">
             <ReviewCard
               v-for="(review, index) in loopedReviews"
@@ -12,6 +14,8 @@
         </div>
 
         <div class="relative overflow-hidden">
+          <div class="pointer-events-none absolute top-0 left-0 w-full h-16 bg-gradient-to-b from-white to-transparent z-10"></div>
+          <div class="pointer-events-none absolute bottom-0 left-0 w-full h-16 bg-gradient-to-t from-white to-transparent z-10"></div>
           <div class="animate-scroll-down">
             <ReviewCard
               v-for="(review, index) in loopedReviews"
@@ -23,6 +27,8 @@
         </div>
 
         <div class="relative overflow-hidden">
+          <div class="pointer-events-none absolute top-0 left-0 w-full h-16 bg-gradient-to-b from-white to-transparent z-10"></div>
+          <div class="pointer-events-none absolute bottom-0 left-0 w-full h-16 bg-gradient-to-t from-white to-transparent z-10"></div>
           <div class="animate-scroll-up">
             <ReviewCard
               v-for="(review, index) in loopedReviews"
@@ -31,7 +37,9 @@
               class="mb-4"
             />
           </div>
+          
         </div>
+        
     </div>
     
 </template>
