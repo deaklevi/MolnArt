@@ -120,11 +120,11 @@ const loopedReviews = computed(() => [...props.reviews, ...props.reviews])
 }
 
 .animate-scroll-left{
-  animation: scrollLeft 60s linear infinite;
+  animation: scrollLeft 6s linear infinite;
 }
 
 .animate-scroll-right{
-  animation: scrollRight 60s linear infinite;
+  animation: scrollRight 6s linear infinite;
 }
 
 </style>
