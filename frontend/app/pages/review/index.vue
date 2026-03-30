@@ -1,16 +1,7 @@
 <template>
 <LayoutsBaseLayout>
-
-<!--
-  A KULCS A MEGOLDÁSHOZ:
-    - Mobilon 'flex flex-col' lesz.
-    - Asztalon 'md:grid' egy 2x2-es rácsot hoz létre.
--->
 <div class="flex flex-col md:grid md:grid-cols-2 md:grid-rows-2 gap-8 p-8">
 
-    <!-- 1. WORKERS SZEKCIÓ -->
-    <!-- Mobilon: 1. (order-1) -->
-    <!-- Asztalon: 1. sor, 1. oszlop -->
     <div class="order-1 md:row-span-1 md:col-span-1">
         <div class="flex flex-wrap justify-center gap-6">
             <ReviewWorkerCard
@@ -26,9 +17,6 @@
         </div>
     </div>
 
-    <!-- 2. CHART SZEKCIÓ -->
-    <!-- Mobilon: 2. (order-2) -->
-    <!-- Asztalon: 1. sor, 2. oszlop (jobbra kerül) -->
     <div class="order-2 md:row-span-2 md:col-span-1">
         <div v-if="selectedWorker && workerReviews.length > 0">
             <ReviewChart :avg-rating="averageRating"/>
@@ -38,13 +26,9 @@
         </div>
     </div>
 
-    <!-- 3. REVIEWS SZEKCIÓ (A KOMMENT) -->
-    <!-- Mobilon: 3. (order-3) -->
-    <!-- Asztalon: 2. sor, 1. oszlop (a workers alá kerül) -->
     <div class="order-3 md:row-span-1 md:col-span-1">
         <div class="mt-10" v-if="selectedWorker && workerReviews.length > 0">
             <ReviewExpanded :review="currentReview" />
-
             <div class="flex items-center justify-center mt-6">
                 <div class="flex items-center gap-4 bg-gray-100 rounded-full p-1 shadow-inner">
                     <button
@@ -82,7 +66,6 @@
 </template>
 
 <script setup>
-// A SCRIPT RÉSZHEZ NEM KELL HOZZÁNYÚLNI, AZ TÖKÉLETES.
 import { ref, computed } from 'vue';
 
 const config = useRuntimeConfig();
