@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <script setup>
 const config = useRuntimeConfig();
 
@@ -49,3 +50,16 @@ import ReviewsSlot from '~/components/Review/ReviewsSlot.vue';
     </LayoutsBaseLayout>
   </div>
 </template>
+=======
+<template>
+    <LayoutsBaseLayout>
+        <h1 class="text-3xl font-bold underline">
+            Hello world!
+        </h1>
+    </LayoutsBaseLayout>
+</template>
+
+<script>
+
+</script>
+>>>>>>> 9c00869fac303a97c058f4480a66c501c93583d7
