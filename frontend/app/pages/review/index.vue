@@ -1,7 +1,6 @@
 <template>
 <LayoutsBaseLayout>
 <div class="flex flex-col md:grid md:grid-cols-2 md:grid-rows-2 gap-8 p-8">
-
     <div class="order-1 md:row-span-1 md:col-span-1">
         <div class="flex flex-wrap justify-center gap-6">
             <ReviewWorkerCard
@@ -17,18 +16,24 @@
         </div>
     </div>
 
-    <div class="order-2 md:row-span-2 md:col-span-1">
-        <div v-if="selectedWorker && workerReviews.length > 0">
+    <div class="order-2 md:row-span-2 md:col-span-1 space-y-8">
+        <div v-if="selectedWorker && workerReviews.length > 0" class="md:mb-[10rem]">
             <ReviewChart :avg-rating="averageRating"/>
         </div>
         <div v-else-if="selectedWorker" class="text-center text-gray-500 mt-10">
             <p>Még nincs értékelés</p>
         </div>
+
+        <div v-if="selectedWorker">
+            <ReviewForm @submit-review="handleReviewSubmit" />
+        </div>
     </div>
 
     <div class="order-3 md:row-span-1 md:col-span-1">
         <div class="mt-10" v-if="selectedWorker && workerReviews.length > 0">
-            <ReviewExpanded :review="currentReview" />
+            <div>
+              <ReviewExpanded :review="currentReview" />
+            </div>
             <div class="flex items-center justify-center mt-6">
                 <div class="flex items-center gap-4 bg-gray-100 rounded-full p-1 shadow-inner">
                     <button
@@ -67,22 +72,20 @@
 
 <script setup>
 import { ref, computed } from 'vue';
+function handleReviewSubmit(comment) {
+  console.log('Review Submitted:', comment);
+  alert(`Thank you for your review: "${comment}"`);
+}
 
 const config = useRuntimeConfig();
-
 const { data: publicUsers } = await useAsyncData('users', () => $fetch(`${config.public.apiBase}/api/user_public_data`));
-
 const selectedWorker = ref(null);
 const currentReviewIndex = ref(0);
 const workerReviews = computed(() => selectedWorker.value?.reviews || []);
-
 const currentReview = computed(() => {
-    if (workerReviews.value.length >0){
-        return workerReviews.value[currentReviewIndex.value];
-    }
+    if (workerReviews.value.length > 0) return workerReviews.value[currentReviewIndex.value];
     return null;
 });
-
 function handleWorkerSelection(worker) {
     selectedWorker.value = worker;
     currentReviewIndex.value = 0;
@@ -90,7 +93,6 @@ function handleWorkerSelection(worker) {
 if (publicUsers.value?.data && publicUsers.value.data.length > 0) {
     selectedWorker.value = publicUsers.value.data[0];
 }
-
 function nextReview(){
     if (workerReviews.value.length > 0) {
         currentReviewIndex.value = (currentReviewIndex.value + 1) % workerReviews.value.length;
@@ -105,11 +107,8 @@ function prevReview() {
         }
     }
 }
-
 const averageRating = computed(() => {
-  if (!workerReviews.value || workerReviews.value.length === 0) {
-    return 0;
-  }
+  if (!workerReviews.value || workerReviews.value.length === 0) return 0;
   const total = workerReviews.value.reduce((sum, review) => sum + review.rating, 0);
   return total / workerReviews.value.length;
 });

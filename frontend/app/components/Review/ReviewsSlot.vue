@@ -78,7 +78,7 @@
 
 <script setup>
 import { computed } from 'vue'
-import ReviewCard from '/components/review/ReviewCard.vue'
+
 
 const props = defineProps({
   reviews: {
