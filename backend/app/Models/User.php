@@ -5,7 +5,6 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -20,29 +19,31 @@ class User extends Authenticatable
      * @var list<string>
      */
     protected $fillable = [
-        'user_name',
+        'name',
+        'email',
         'password',
-        'description',
-        'profile_image',
     ];
 
-    // Ezzel mondjuk meg a Laravelnek, hogy ne az emailt keresse login-kor
-    public function findForPassport($username) {
-        return $this->where('user_name', $username)->first();
-    }
+    /**
+     * The attributes that should be hidden for serialization.
+     *
+     * @var list<string>
+     */
+    protected $hidden = [
+        'password',
+        'remember_token',
+    ];
 
-    public function customers(): HasMany
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
     {
-        return $this->hasMany(Customer::class);
-    }
-    public function reviews(): HasMany
-    {
-        return $this->hasMany(Review::class);
-    }
-
-    public function services()
-    {
-        // A 'withTimestamps' azért kell, ha látni akarjuk, mikor rendelték hozzá
-        return $this->belongsToMany(Service::class);
+        return [
+            'email_verified_at' => 'datetime',
+            'password' => 'hashed',
+        ];
     }
 }
