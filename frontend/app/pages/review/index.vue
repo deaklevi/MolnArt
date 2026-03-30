@@ -1,9 +1,8 @@
 <template>
 <LayoutsBaseLayout>
+<div class="flex flex-col md:grid md:grid-cols-2 md:grid-rows-2 gap-8 p-8">
 
-<div class="grid grid-cols-2 gap-8 p-8">
-
-    <div class="p-6 rounded-lg">
+    <div class="order-1 md:row-span-1 md:col-span-1">
         <div class="flex flex-wrap justify-center gap-6">
             <ReviewWorkerCard
                 v-for="worker in publicUsers?.data"
@@ -16,10 +15,20 @@
         <div v-if="selectedWorker" class="mt-8 p-4 bg-white rounded-lg shadow-md text-center">
             <p class="text-gray-700 mb-4">{{ selectedWorker.description }}</p>
         </div>
+    </div>
 
-        <div class="mt-10 h-[95%] " v-if="selectedWorker && workerReviews.length > 0">
+    <div class="order-2 md:row-span-2 md:col-span-1">
+        <div v-if="selectedWorker && workerReviews.length > 0">
+            <ReviewChart :avg-rating="averageRating"/>
+        </div>
+        <div v-else-if="selectedWorker" class="text-center text-gray-500 mt-10">
+            <p>Még nincs értékelés</p>
+        </div>
+    </div>
+
+    <div class="order-3 md:row-span-1 md:col-span-1">
+        <div class="mt-10" v-if="selectedWorker && workerReviews.length > 0">
             <ReviewExpanded :review="currentReview" />
-
             <div class="flex items-center justify-center mt-6">
                 <div class="flex items-center gap-4 bg-gray-100 rounded-full p-1 shadow-inner">
                     <button
@@ -32,14 +41,11 @@
                             <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
                         </svg>
                     </button>
-
-
                     <div class="h-6 w-px bg-gray-300"></div>
                     <span class="text-gray-700 font-semibold tabular-nums w-12 text-center">
                         {{ currentReviewIndex + 1 }} / {{ workerReviews.length }}
                     </span>
                     <div class="h-6 w-px bg-gray-300"></div>
-
                     <button
                         @click="nextReview"
                         :disabled="workerReviews.length <= 1"
@@ -55,13 +61,7 @@
         </div>
     </div>
 
-    <!-- <div class="p-6 rounded-lg">
-        <h2 class="text-xl font-bold mb-4">Second Column</h2>
-        <p>Your other content goes here.</p>
-    </div> -->
-
 </div>
-
 </LayoutsBaseLayout>
 </template>
 
@@ -71,7 +71,6 @@ import { ref, computed } from 'vue';
 const config = useRuntimeConfig();
 
 const { data: publicUsers } = await useAsyncData('users', () => $fetch(`${config.public.apiBase}/api/user_public_data`));
-
 
 const selectedWorker = ref(null);
 const currentReviewIndex = ref(0);
@@ -86,7 +85,7 @@ const currentReview = computed(() => {
 
 function handleWorkerSelection(worker) {
     selectedWorker.value = worker;
-    currentReviewIndex.value = 0; 
+    currentReviewIndex.value = 0;
 }
 if (publicUsers.value?.data && publicUsers.value.data.length > 0) {
     selectedWorker.value = publicUsers.value.data[0];
@@ -107,5 +106,11 @@ function prevReview() {
     }
 }
 
-
+const averageRating = computed(() => {
+  if (!workerReviews.value || workerReviews.value.length === 0) {
+    return 0;
+  }
+  const total = workerReviews.value.reduce((sum, review) => sum + review.rating, 0);
+  return total / workerReviews.value.length;
+});
 </script>
