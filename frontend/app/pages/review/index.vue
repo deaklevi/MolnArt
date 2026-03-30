@@ -16,6 +16,10 @@
         <div v-if="selectedWorker" class="mt-8 p-4 bg-white rounded-lg shadow-md text-center">
             <p class="text-gray-700 mb-4">{{ selectedWorker.description }}</p>
         </div>
+
+        <div class="mt-10 mx-auto">
+            <ReviewExpanded :review="reviews.data[0]" />
+        </div>
     </div>
 
     <!-- <div class="p-6 rounded-lg">
@@ -30,18 +34,20 @@
 
 <script setup>
 import { ref } from 'vue';
+import Expanded from '~/components/Review/Expanded.vue';
 
 const config = useRuntimeConfig();
 
 const { data: publicUsers } = await useAsyncData('users', () => $fetch(`${config.public.apiBase}/api/user_public_data`));
+const {data: reviews} = await useFetch(`${config.public.apiBase}/api/reviews`);
+
+console.log(reviews);
+
 
 const selectedWorker = ref(null);
-
 function handleWorkerSelection(worker) {
     selectedWorker.value = worker;
 }
-console.log(publicUsers.value.data[1])
-
 if (publicUsers.value?.data && publicUsers.value.data.length > 0) {
     selectedWorker.value = publicUsers.value.data[0];
 }
