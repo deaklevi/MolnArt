@@ -55,10 +55,14 @@
         </div>
     </div>
 
-    <!-- <div class="p-6 rounded-lg">
-        <h2 class="text-xl font-bold mb-4">Second Column</h2>
-        <p>Your other content goes here.</p>
-    </div> -->
+    <div class="p-6 rounded-lg">
+        <div v-if="selectedWorker &&workerReviews.length >0">
+            <ReviewChart  :avg-rating="averageRating"/>
+        </div>
+        <div v-else-if="selectedWorker" class="text-center text-gray-500 mt-10">
+            <p>Még nincs értékelés</p>
+        </div>
+    </div> 
 
 </div>
 
@@ -106,6 +110,15 @@ function prevReview() {
         }
     }
 }
+
+const averageRating = computed(() => {
+  if (!workerReviews.value || workerReviews.value.length === 0) {
+    return 0;
+  }
+  const total = workerReviews.value.reduce((sum, review) => sum + review.rating, 0);
+  return total / workerReviews.value.length;
+});
+
 
 
 </script>
