@@ -1,7 +1,8 @@
 <template>
 <LayoutsBaseLayout>
-<div class="flex flex-col md:grid md:grid-cols-2 md:grid-rows-2 gap-8 p-8">
-    <div class="order-1 md:row-span-1 md:col-span-1">
+<!-- ADDED min-h-screen TO MAKE THE GRID FULL HEIGHT -->
+<div class="flex flex-col md:grid md:grid-cols-2 md:grid-rows-3 gap-8 p-8 min-h-screen">
+    <div class="order-1  md:col-span-2">
         <div class="flex flex-wrap justify-center gap-6">
             <ReviewWorkerCard
                 v-for="worker in publicUsers?.data"
@@ -16,8 +17,9 @@
         </div>
     </div>
 
-    <div class="order-2 md:row-span-2 md:col-span-1 space-y-8">
-        <div v-if="selectedWorker && workerReviews.length > 0" class="md:mb-[10rem]">
+    <div class="order-2 md:row-span-3 md:mt-40 md:col-span-1 space-y-8">
+
+        <div v-if="selectedWorker && workerReviews.length > 0" class="md:mb-">
             <ReviewChart :avg-rating="averageRating"/>
         </div>
         <div v-else-if="selectedWorker" class="text-center text-gray-500 mt-10">
@@ -25,13 +27,18 @@
         </div>
 
         <div v-if="selectedWorker">
-            <ReviewForm @submit-review="handleReviewSubmit" />
+             <button
+                @click="isModalVisible = true"
+                class="inline-flex w-full justify-center rounded-md border border-transparent bg-[#36082A] px-4 py-2 text-base font-medium text-white hover:bg-opacity-90"
+              >
+                Értékelés írása
+              </button>
         </div>
     </div>
 
-    <div class="order-3 md:row-span-1 md:col-span-1">
-        <div class="mt-10" v-if="selectedWorker && workerReviews.length > 0">
-            <div>
+    <div class="order-4 md:col-span-1 md:row-span-3 flex flex-col">
+        <div class="mt-10 h-full flex flex-col" v-if="selectedWorker && workerReviews.length > 0">
+            <div class="flex-grow">
               <ReviewExpanded :review="currentReview" />
             </div>
             <div class="flex items-center justify-center mt-6">
@@ -67,14 +74,32 @@
     </div>
 
 </div>
+
+<ReviewModal
+    v-if="isModalVisible"
+    :workers="publicUsers.data"
+    :initial-worker-id="selectedWorker?.id"
+    @close="isModalVisible = false"
+    @submit-review="handleReviewSubmit"
+/>
+
 </LayoutsBaseLayout>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue';
-function handleReviewSubmit(comment) {
-  console.log('Review Submitted:', comment);
-  alert(`Thank you for your review: "${comment}"`);
+
+const isModalVisible = ref(false);
+
+async function handleReviewSubmit(reviewData) {
+  console.log('Full Review to Submit:', reviewData);
+    await $fetch(`${config.public.apiBase}/api/reviews`, {
+        method: 'POST',
+        body: reviewData
+    });
+
+  alert(`Köszönjük az értékelést, ${reviewData.name}!`);
+  isModalVisible.value = false; 
 }
 
 const config = useRuntimeConfig();
