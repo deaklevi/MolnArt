@@ -24,6 +24,42 @@ const editingAppointment = ref({
   end: ''
 })
 
+// --- Szolgáltatások állapota ---
+const services = ref([])
+
+// --- Szolgáltatások lekérése ---
+const fetchServices = async () => {
+  try {
+    const res = await $fetch(`${apiBase}/api/services`, { credentials: 'include' })
+    // A Laravel response felépítésétől függően: res.data vagy simán res
+    services.value = res.data || res
+  } catch (err) {
+    console.error("Hiba a szolgáltatások betöltésekor:", err)
+  }
+}
+
+// --- Automatikus időszámítás ---
+// Figyeljük, ha változik a kiválasztott szolgáltatás vagy a kezdési idő
+watch(() => [editingAppointment.value.service, editingAppointment.value.start], ([newService, newStart]) => {
+  if (newService && newStart) {
+    const selectedService = services.value.find(s => s.name === newService)
+    if (selectedService) {
+      const startDate = new Date(newStart)
+      // Hozzáadjuk a szolgáltatás időtartamát (percekben)
+      const endDate = new Date(startDate.getTime() + selectedService.time * 60000)
+      
+      // Visszaalakítjuk ISO formátumba az input számára (YYYY-MM-DDTHH:mm)
+      const year = endDate.getFullYear()
+      const month = String(endDate.getMonth() + 1).padStart(2, '0')
+      const day = String(endDate.getDate()).padStart(2, '0')
+      const hours = String(endDate.getHours()).padStart(2, '0')
+      const minutes = String(endDate.getMinutes()).padStart(2, '0')
+      
+      editingAppointment.value.end = `${year}-${month}-${day}T${hours}:${minutes}`
+    }
+  }
+})
+
 const getCsrfToken = () => {
   if (process.server) return null
   const match = document.cookie.match(new RegExp('(^| )XSRF-TOKEN=([^;]+)'))
@@ -209,6 +245,7 @@ const calculateBookingStyle = (appointment) => {
 onMounted(() => { 
   generateCalendar()
   updateLayout()
+  fetchServices()
   window.addEventListener('resize', updateLayout)
 })
 </script>
@@ -288,32 +325,45 @@ onMounted(() => {
             <form @submit.prevent="handleSave" class="p-6 space-y-4">
               <div>
                 <label class="block text-[10px] font-black uppercase text-slate-400 mb-1">Vendég Neve</label>
-                <input v-model="editingAppointment.name" required placeholder="pl. Kovács János" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl font-bold" />
+                <input v-model="editingAppointment.name" required placeholder="pl. Kovács János" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl font-bold focus:outline-indigo-500" />
               </div>
+
               <div class="grid grid-cols-2 gap-4">
                 <div>
                   <label class="block text-[10px] font-black uppercase text-slate-400 mb-1">Email</label>
-                  <input v-model="editingAppointment.email" type="email" placeholder="email@pelda.hu" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm" />
+                  <input v-model="editingAppointment.email" type="email" placeholder="email@pelda.hu" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-indigo-500" />
                 </div>
                 <div>
                   <label class="block text-[10px] font-black uppercase text-slate-400 mb-1">Telefon</label>
-                  <input v-model="editingAppointment.phone_number" required placeholder="+36..." class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm" />
+                  <input v-model="editingAppointment.phone_number" required placeholder="+36..." class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-indigo-500" />
                 </div>
               </div>
+
               <div>
                 <label class="block text-[10px] font-black uppercase text-indigo-600 mb-1">Szolgáltatás</label>
-                <input v-model="editingAppointment.service" required placeholder="pl. Hajvágás" class="w-full p-3 border border-slate-200 rounded-xl font-bold focus:ring-2 focus:ring-indigo-500 outline-none" />
+                <select 
+                  v-model="editingAppointment.service" 
+                  required 
+                  class="w-full p-3 bg-white border-2 border-indigo-100 rounded-xl font-bold focus:ring-2 focus:ring-indigo-500 outline-none appearance-none cursor-pointer"
+                >
+                  <option value="" disabled selected>Válassz szolgáltatást...</option>
+                  <option v-for="service in services" :key="service.id" :value="service.name">
+                    {{ service.name }} ({{ service.time }} perc)
+                  </option>
+                </select>
               </div>
+
               <div class="grid grid-cols-2 gap-4">
                 <div>
                   <label class="block text-[10px] font-black uppercase text-indigo-600 mb-1">Kezdés</label>
-                  <input type="datetime-local" v-model="editingAppointment.start" required class="w-full p-2 text-sm border border-slate-200 rounded-lg" />
+                  <input type="datetime-local" v-model="editingAppointment.start" required class="w-full p-2 text-sm border border-slate-200 rounded-lg focus:outline-indigo-500" />
                 </div>
                 <div>
                   <label class="block text-[10px] font-black uppercase text-indigo-600 mb-1">Vége</label>
-                  <input type="datetime-local" v-model="editingAppointment.end" required class="w-full p-2 text-sm border border-slate-200 rounded-lg" />
+                  <input type="datetime-local" v-model="editingAppointment.end" required class="w-full p-2 text-sm border border-slate-200 rounded-lg bg-slate-50" />
                 </div>
               </div>
+
               <div class="pt-2">
                 <button type="submit" :disabled="isSaving" class="w-full py-4 bg-indigo-600 text-white font-black rounded-2xl shadow-lg hover:bg-indigo-700 transition-all disabled:opacity-50 flex justify-center items-center gap-2">
                   <span v-if="isSaving" class="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full"></span>
