@@ -91,13 +91,10 @@ import { ref, computed } from 'vue';
 const isModalVisible = ref(false);
 
 async function handleReviewSubmit(reviewData) {
-  console.log('Full Review to Submit:', reviewData);
     await $fetch(`${config.public.apiBase}/api/reviews`, {
         method: 'POST',
         body: reviewData
     });
-
-  alert(`Köszönjük az értékelést, ${reviewData.name}!`);
   isModalVisible.value = false; 
 }
 
