@@ -2,7 +2,7 @@
     <div 
     @click="$emit('select',worker)"
     class="cursor-pointer text-center p-4 rounded-2xl transition-all duration-300"
-    :class="isElected ? 'bg-gray-200 shadow-md scale-105' : 'hover:bg-gray-50'">
+    :class="isElected ? 'bg-gray-100 shadow-md scale-105' : 'hover:bg-gray-50'">
         
         <img class="w-20 h-20 mx-auto rounded-full object-cover mb-3" :src="apiBase+worker.profile_image" :alt="worker.profile_image">
         

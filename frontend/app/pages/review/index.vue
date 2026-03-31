@@ -1,8 +1,7 @@
 <template>
 <LayoutsBaseLayout>
-<!-- ADDED min-h-screen TO MAKE THE GRID FULL HEIGHT -->
 <div class="flex flex-col md:grid md:grid-cols-2 md:grid-rows-3 gap-8 p-8 min-h-screen">
-    <div class="order-1  md:col-span-2">
+    <div class="order-1 md:col-span-2">
         <div class="flex flex-wrap justify-center gap-6">
             <ReviewWorkerCard
                 v-for="worker in publicUsers?.data"
@@ -12,7 +11,7 @@
                 @select="handleWorkerSelection"
             />
         </div>
-        <div v-if="selectedWorker" class="mt-8 p-4 bg-white rounded-lg shadow-md text-center">
+        <div v-if="selectedWorker" class="mt-8 p-4 bg-white rounded-lg shadow-md text-center border border-gray-200">
             <p class="text-gray-700 mb-4">{{ selectedWorker.description }}</p>
         </div>
     </div>
