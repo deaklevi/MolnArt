@@ -29,7 +29,7 @@
                 <li><a href="#gallery" @click="toggleMenu" class="relative group hover:text-[#b5a494] transition-colors duration-300">Galéria <span class="absolute -bottom-2 left-0 w-0 h-[1px] bg-[#b5a494] transition-all duration-500 ease-out group-hover:w-full"></span></a></li>
                 <li><a href="#services" @click="toggleMenu" class="relative group hover:text-[#b5a494] transition-colors duration-300">Szolgáltatások <span class="absolute -bottom-2 left-0 w-0 h-[1px] bg-[#b5a494] transition-all duration-500 ease-out group-hover:w-full"></span></a></li>
                 <li><a href="#staff" @click="toggleMenu" class="relative group hover:text-[#b5a494] transition-colors duration-300">Csapat <span class="absolute -bottom-2 left-0 w-0 h-[1px] bg-[#b5a494] transition-all duration-500 ease-out group-hover:w-full"></span></a></li>
-                <li><a href="#about" @click="toggleMenu" class="relative group hover:text-[#b5a494] transition-colors duration-300">Rólunk <span class="absolute -bottom-2 left-0 w-0 h-[1px] bg-[#b5a494] transition-all duration-500 ease-out group-hover:w-full"></span></a></li>
+                <li><a href="#aboutus" @click="toggleMenu" class="relative group hover:text-[#b5a494] transition-colors duration-300">Rólunk <span class="absolute -bottom-2 left-0 w-0 h-[1px] bg-[#b5a494] transition-all duration-500 ease-out group-hover:w-full"></span></a></li>
             </ul>
         </div>
     </nav>

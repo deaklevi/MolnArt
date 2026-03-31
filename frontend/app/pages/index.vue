@@ -16,7 +16,7 @@ const {data: reviews} = await useFetch(`${config.public.apiBase}/api/reviews`);
     <LayoutsBaseLayout>
     <BaseGallery />
 
-    <div class="container mx-auto px-4 py-8">
+    <div id="services" class="container mx-auto px-4 py-8">
       <h2 class="mb-12 text-center text-4xl font-serif tracking-wide text-gray-900 uppercase">
         Alap szolgáltatásaink
       </h2>
@@ -29,9 +29,20 @@ const {data: reviews} = await useFetch(`${config.public.apiBase}/api/reviews`);
         />
       </div>
 
+      
+
       <div v-else class="text-center py-10 text-gray-400 animate-pulse">
         Szolgáltatások betöltése...
       </div>
+
+      <NuxtLink to="/booking" class="flex justify-center my-10 mx-10">
+        <button 
+          type="button" 
+          class="w-full md:w-1/3 lg:w-1/4 px-6 py-3 text-base font-semibold text-white bg-[#36082A] rounded-lg shadow-md hover:bg-[#470C37] transform active:scale-95 transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-[#36082A]/50"
+        >
+          Foglaljon most
+        </button>
+      </NuxtLink>
     </div>
     
     <div id="staff" class="py-20 bg-stone-50">
@@ -45,7 +56,20 @@ const {data: reviews} = await useFetch(`${config.public.apiBase}/api/reviews`);
     </h2>
     <ReviewReviewsSlot :reviews="reviews.data" />
     </section>
-    <BaseAboutUs/>
+    
+    <NuxtLink to="/reviews" class="flex justify-center my-10 mx-10">
+      <button 
+        type="button" 
+        class="w-full md:w-1/3 lg:w-1/4 px-6 py-3 text-base font-semibold text-white bg-[#36082A] rounded-lg shadow-md hover:bg-[#470C37] transform active:scale-95 transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-[#36082A]/50"
+      >
+        Nézze meg értékeléseinket
+      </button>
+  </NuxtLink>
+
+
+    <div id="aboutus">
+      <BaseAboutUs/>
+    </div>
 
 
     </LayoutsBaseLayout>

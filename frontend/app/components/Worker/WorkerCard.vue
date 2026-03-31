@@ -7,7 +7,9 @@
 
             <h3 class="text-2xl font-bold mb-2">{{ worker.user_name }}</h3>
             <p class="text-base mb-4">{{ worker.description }}</p>
-            <button class="bg-[#D0BEAC] text-black font-semibold p-2 rounded-lg w-[90%] mx-auto transition-colors hover:bg-opacity-90"> Foglalás most </button>
+            <NuxtLink class="w-full" to="/booking">
+                <button class="bg-[#36082A] rounded-lg shadow-md hover:bg-[#470C37] text-white font-semibold p-2 rounded-lg w-[90%] mx-auto transition-colors hover:bg-opacity-90"> Foglalás most </button>
+            </NuxtLink>
         </div>
     </div>
 

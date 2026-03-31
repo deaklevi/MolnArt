@@ -16,11 +16,13 @@ const props = defineProps({
         {{ service.time }} perc
       </p>
     </div>
-    <button 
-      type="button" 
-      class="px-5 py-2 text-sm font-medium text-white bg-[#36082A] rounded-md hover:bg-[#470C37] transition-colors focus:ring-4 focus:ring-blue-300"
-    >
+    <NuxtLink to="booking">
+      <button 
+        type="button" 
+        class="px-5 py-2 text-sm font-medium text-white bg-[#36082A] rounded-md hover:bg-[#470C37] transition-colors focus:ring-4 focus:ring-blue-300"
+      >
       Foglalás
-    </button>
+      </button>
+    </NuxtLink>
   </div>
 </template>

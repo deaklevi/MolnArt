@@ -51,15 +51,15 @@ onUnmounted(() => {
           </p>
           
           <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <a href="#booking" class="w-full sm:w-auto">
+            <NuxtLink to="/booking" class="w-full sm:w-auto">
               <button class="w-full sm:w-auto bg-[#b5a494] border border-[#b5a494] text-black py-4 px-10 text-xs uppercase tracking-[0.3em] font-bold transition-colors duration-300 hover:bg-transparent hover:text-[#b5a494]">
                 Foglaljon most
               </button>
-            </a>
+            </NuxtLink>
 
-            <a href="#services" class="w-full sm:w-auto">
+            <a href="#staff" class="w-full sm:w-auto">
               <button class="w-full sm:w-auto border border-white/40 text-white py-4 px-10 text-xs uppercase tracking-[0.3em] font-bold transition-colors duration-300 backdrop-blur-sm hover:bg-white hover:text-black hover:border-white">
-                Szolgáltatásaink
+                Csapatunk
               </button>
             </a>
           </div>
