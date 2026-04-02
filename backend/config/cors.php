@@ -6,7 +6,7 @@ return [
     'allowed_methods' => ['*'],
 
     // Itt ne használj csillagot (*), írd ki pontosan a Nuxt címed!
-    'allowed_origins' => ['http://localhost:3000', 'http://192.168.1.83:3000', 'http://192.168.1.105:3000'], 
+    'allowed_origins' => ['http://localhost:3000', 'http://192.168.1.83:3000', 'http://192.168.0.104:3000'], 
 
     'allowed_origins_patterns' => [],
 
