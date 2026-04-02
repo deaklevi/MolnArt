@@ -111,7 +111,7 @@
               <span class="text-lg font-bold text-purple-400">{{ totalTime }} perc összesen</span>
             </div>
             <button @click="proceedToCalendar" 
-                    class="bg-purple-900 text-white px-6 py-3 rounded-xl font-black uppercase text-xs tracking-widest shadow-lg active:scale-95 transition-transform">
+              class="bg-purple-900 text-white px-6 py-3 rounded-xl font-black uppercase text-xs tracking-widest shadow-lg active:scale-95 transition-transform">
               Időpont
             </button>
           </div>

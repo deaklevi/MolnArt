@@ -46,16 +46,15 @@
             <div class="absolute border-2 border-[#44223b]/10 rounded-2xl transform translate-x-1 translate-y-1 md:translate-x-2 md:translate-y-2"></div>
             <div class="relative bg-white p-1 md:p-2 rounded-2xl shadow-xl overflow-hidden aspect-video lg:aspect-square max-h-87.5 md:max-h-125">
               <iframe 
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d673.8041195109354!2d19.055501169653237!3d47.50517520414683!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x4741dc6cce765981%3A0x4267edaa08e0e973!2sBudapest%2C%20Haj%C3%B3s%20u.%2033%2C%201065!5e0!3m2!1shu!2shu!4v1774733959101!5m2!1shu!2shu"
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2695.225042831998!2d19.053785876824417!3d47.505008394986724!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x4741dc6ccf6fb099%3A0xcc196fb75ed3a239!2sBudapest%2C%20Haj%C3%B3s%20u.%2031%2C%201065!5e0!3m2!1shu!2shu!4v1775169683524!5m2!1shu!2shu"
                 class="w-full h-full rounded-xl grayscale-[0.2] contrast-[1.1]"
                 style="border:0;" 
-                allowfullscreen="" 
+                allowfullscreen=""
                 loading="lazy">
               </iframe>
             </div>
           </div>
         </div>
-
       </div>
     </div>
   </section>
