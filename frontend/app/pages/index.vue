@@ -45,7 +45,7 @@ const {data: reviews} = await useFetch(`${config.public.apiBase}/api/reviews`);
       </NuxtLink>
     </div>
     
-    <div id="staff" class="py-20 bg-stone-50">
+    <div id="staff" class="py-20">
         <h2 class="mb-12 text-center text-4xl font-serif tracking-wide uppercase">Csapatunk</h2>
         <WorkerSection :workers="publicUsers?.data || []" />
     </div>
@@ -67,11 +67,13 @@ const {data: reviews} = await useFetch(`${config.public.apiBase}/api/reviews`);
   </NuxtLink>
 
 
-    <div id="aboutus">
-      <BaseAboutUs/>
-    </div>
+    
 
 
     </LayoutsBaseLayout>
+    <div id="aboutus">
+      <BaseAboutUs/>
+    </div>
+    <BaseFooter/>
   </div>
 </template>
