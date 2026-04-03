@@ -38,30 +38,40 @@
         <div v-if="selectedWorker?.services?.length" class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div v-for="service in selectedWorker.services" :key="service.id" 
                @click="proceedToCalendar(service)"
-               class="bg-white p-6 border border-stone-100 rounded-xl shadow-sm hover:shadow-md transition-all border-l-4 border-l-transparent hover:border-l-purple-900 flex flex-col justify-between cursor-pointer group">
+               class="bg-white p-6 border border-stone-100 rounded-2xl shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between cursor-pointer group">
+            
             <div>
               <div class="flex justify-between items-start mb-3">
-                <h3 class="font-bold text-lg text-gray-900 leading-snug group-hover:text-purple-900 transition-colors">{{ service.name }}</h3>
-                <div class="flex items-center text-stone-500 text-xs bg-stone-50 px-2 py-1 rounded">
-                  {{ service.time }}p
+                <h3 class="font-bold text-lg text-gray-900 leading-snug group-hover:text-purple-900 transition-colors">
+                  {{ service.name }}
+                </h3>
+                <div class="flex items-center text-purple-900 text-[10px] font-bold bg-purple-50 px-2 py-1 rounded-md uppercase tracking-tighter">
+                  {{ service.time }} perc
                 </div>
               </div>
-              <p class="text-stone-500 text-sm mb-4 leading-relaxed">
-                {{ service.description || 'Professzionális szolgáltatás kiváló minőségben.' }}
+              <p class="text-stone-500 text-sm mb-6 leading-relaxed line-clamp-3">
+                {{ service.description || 'Professzionális szolgáltatás kiváló minőségben, személyre szabott figyelemmel.' }}
               </p>
             </div>
-            <div class="text-purple-900 font-black text-[10px] uppercase tracking-widest flex items-center gap-2">
-              Időpont foglalása <span class="group-hover:translate-x-1 transition-transform">→</span>
+
+            <div class="mt-4 pt-4 border-t border-stone-50 flex items-center">
+              
+              <div class="flex items-center gap-2 px-5 py-2.5 rounded-full bg-purple-950 text-white text-[10px] font-black uppercase tracking-widest transition-all duration-300 group-hover:bg-purple-800 group-hover:shadow-lg group-hover:shadow-purple-900/20 group-hover:scale-105 active:scale-95">
+                Időpont foglalása 
+                <span class="transform transition-transform duration-300 group-hover:translate-x-1">→</span>
+              </div>
             </div>
+
           </div>
         </div>
-        <div v-else class="text-center py-20 text-stone-400 italic">
-          Nincsenek elérhető szolgáltatások ennél a szakembernél.
+        
+        <div v-else class="text-center py-20 bg-white rounded-3xl border border-dashed border-stone-200">
+          <p class="text-stone-400 italic font-serif">Nincsenek elérhető szolgáltatások ennél a szakembernél.</p>
         </div>
       </div>
 
       <div class="lg:col-span-4 space-y-6">
-        <div v-if="selectedWorker" class="bg-white p-8 rounded-2xl shadow-sm border border-stone-100 sticky top-40">
+        <div v-if="selectedWorker" class="bg-white p-8 rounded-3xl shadow-sm border border-stone-100 sticky top-40">
           <div class="mb-8">
             <h3 class="text-xs font-black text-purple-900 uppercase tracking-[0.2em] mb-4 border-b border-stone-50 pb-2">Bemutatkozás</h3>
             <h2 class="text-2xl font-serif text-gray-950 mb-3">{{ selectedWorker.user_name }}</h2>
@@ -72,7 +82,7 @@
 
           <div>
             <h3 class="text-xs font-black text-purple-900 uppercase tracking-[0.2em] mb-4 border-b border-stone-50 pb-2">Nyitvatartás</h3>
-            <div class="space-y-2">
+            <div class="space-y-3">
               <div v-for="(hours, day) in schedule" :key="day" class="flex justify-between text-sm">
                 <span class="text-stone-500">{{ day }}</span>
                 <span :class="hours === 'Zárva' ? 'text-red-400' : 'text-gray-900 font-medium'">{{ hours }}</span>
@@ -81,6 +91,7 @@
           </div>
         </div>
       </div>
+
     </div>
   </div>
 </template>
@@ -158,3 +169,4 @@ const proceedToCalendar = (service) => {
   router.push('/booking/calendar');
 };
 </script>
+
