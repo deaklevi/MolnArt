@@ -11,13 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('appointments', function (Blueprint $table) {
+        Schema::create('products', function (Blueprint $table) {
             $table->id();
-            $table->dateTime('appointment_from');
-            $table->dateTime('appointment_to');
-            $table->string('service');
-            $table->foreignId('customer_id')->constrained()->cascadeOnDelete();
-            $table->timestamps(); 
+            $table->string('name');
+            $table->string('unit');
+            $table->float('stock')->default(0);
+            $table->timestamps();
         });
     }
 
@@ -26,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('appointments');
+        Schema::dropIfExists('products');
     }
 };
