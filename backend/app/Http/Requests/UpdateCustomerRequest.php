@@ -23,9 +23,9 @@ class UpdateCustomerRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['required','string','25'],
-            'email' => ['required','string','45','unique:customers,email'],
-            'phone_number' => ['required','string','25'],
+            'name' => ['sometimes','string','25'],
+            'email' => ['sometimes','string','45','unique:customers,email'],
+            'phone_number' => ['sometimes','string','25'],
         ];
     }
 }

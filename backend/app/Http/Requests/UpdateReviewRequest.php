@@ -23,11 +23,11 @@ class UpdateReviewRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'profile_image' => ['nullable', 'string', 'max:25'],
-            'name' => ['required', 'string', 'max:25'],
-            'rating' => ['required', 'integer', 'min:1', 'max:5'],
-            'comment' => ['nullable', 'string'],
-            'user_id' => ['required', 'exists:users,id'],
+            'profile_image' => ['sometimes', 'string', 'max:25'],
+            'name' => ['sometimes', 'string', 'max:25'],
+            'rating' => ['sometimes', 'integer', 'min:1', 'max:5'],
+            'comment' => ['sometimes', 'string'],
+            'user_id' => ['sometimes', 'exists:users,id'],
         ];
     }
 }
