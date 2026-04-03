@@ -21,6 +21,12 @@ class AppointmentResource extends JsonResource
           'service' => $this->service,
           //'customer_id' => $this->customer_id,
           'customer' => new CustomerResource($this->whenLoaded('customer')),
+          'products' => $this->whenLoaded('products', fn()=> $this->products->map(fn($p)=>[
+            'id' => $p->id,
+            'name' => $p->name,
+            'unit' => $p->unit,
+            'quantity' => $p->usage->quantity,
+          ]))
         ];
     }
 }
