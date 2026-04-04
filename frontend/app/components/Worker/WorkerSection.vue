@@ -31,7 +31,7 @@
             "{{ workers[activeIndex]?.role || 'Munkatárs' }}"
           </p>
           
-          <NuxtLink to="/booking" class="inline-block w-full max-w-[280px]">
+          <NuxtLink v-if="workers[activeIndex]" :to="{ path: '/booking', query: { workerId: workers[activeIndex].id} }" class="inline-block w-full max-w-[280px]">
             <button class="w-full py-4 bg-[#2D0A22] text-white font-bold rounded-lg shadow-md active:scale-95 transition-all">
               Foglalás megkezdése
             </button>
