@@ -44,9 +44,11 @@ class DatabaseSeeder extends Seeder
 
        $this->call([
             ServiceSeeder::class,
-            ReviewSeeder::class,
+            ProductSeeder::class,
             CustomerSeeder::class,
+            ReviewSeeder::class,
             AppointmentSeeder::class,
+            ScheduleSeeder::class
         ]);
 
        $allServiceIds = Service::pluck('id')->toArray();
