@@ -27,8 +27,9 @@ class StoreAppointmentRequest extends FormRequest
             'appointment_to' => ['required', 'date', 'after:appointment_from'],
             'service' => ['required', 'string', 'max:25'],
             'customer_id' => ['required', 'exists:customers,id'],
+            'user_id' => ['required', 'exists:users,id'],
             'name' => ['sometimes', 'string', 'max:100'],
-            'email' => ['sometimes', 'email', 'max:100'],
+            'email' => ['required', 'email', 'max:100'],
             'phone_number' => ['sometimes', 'string', 'max:20'],
         ];
     }

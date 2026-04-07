@@ -19,7 +19,7 @@ class AppointmentResource extends JsonResource
           'appointment_from' => $this->appointment_from,
           'appointment_to' => $this->appointment_to,
           'service' => $this->service,
-          //'customer_id' => $this->customer_id,
+          'user_id' => $this->user_id,
           'customer' => new CustomerResource($this->whenLoaded('customer')),
           'products' => $this->whenLoaded('products', fn()=> $this->products->map(fn($p)=>[
             'id' => $p->id,

@@ -24,12 +24,12 @@ class UpdateAppointmentRequest extends FormRequest
     {
         return [
             'appointment_from' => ['sometimes', 'date'],
-            'appointment_to' => ['sometimes', 'date', 'after:appointment_from'],
-            'service' => ['sometimes', 'string', 'max:25'],
-            'customer_id' => ['sometimes', 'exists:customers,id'],
-            'name' => ['sometimes', 'string', 'max:100'],
-            'email' => ['sometimes', 'email', 'max:100'],
-            'phone_number' => ['sometimes', 'string', 'max:20'],
+            'appointment_to'   => ['sometimes', 'date', 'after:appointment_from'],
+            'service'          => ['sometimes', 'string', 'max:25'],
+            'customer_id'      => ['sometimes', 'exists:customers,id'],
+            'name'             => ['sometimes', 'string', 'max:100'],
+            'email'            => ['sometimes', 'email', 'max:100'],
+            'phone_number'     => ['sometimes', 'string', 'max:20'],
         ];
     }
 }
