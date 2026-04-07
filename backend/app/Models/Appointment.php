@@ -17,6 +17,7 @@ class Appointment extends Model
         'appointment_to',
         'service',
         'customer_id',
+        'user_id',
     ];
     
     protected $casts = [
@@ -31,5 +32,9 @@ class Appointment extends Model
 
     public function products():BelongsToMany{
         return $this->belongsToMany(Product::class,'appointment_product')->using(AppointmentProduct::class)->withPivot('quantity')->as('usage');
+    }
+
+    public function user():BelongsTo{
+        return $this->belongsTo(User::class,'user_id');
     }
 }
