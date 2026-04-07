@@ -31,7 +31,7 @@ const submit = () => emit('save', { ...form })
 
       <div class="flex justify-between items-center">
         <h2 class="text-lg font-semibold">
-          {{ isNew ? 'New Appointment' : 'Edit Appointment' }}
+          {{ isNew ? 'Időpont hozzáadása' : 'Időpont szerkesztés' }}
         </h2>
         <button @click="emit('close')" class="text-gray-400 hover:text-gray-600">✕</button>
       </div>
@@ -48,12 +48,12 @@ const submit = () => emit('save', { ...form })
 
         <div class="grid grid-cols-2 gap-2">
           <div>
-            <label class="text-xs text-gray-500">From</label>
+            <label class="text-xs text-gray-500">Tól</label>
             <input v-model="form.appointment_from" type="datetime-local"
               class="w-full border rounded-lg px-3 py-2 text-sm" />
           </div>
           <div>
-            <label class="text-xs text-gray-500">To</label>
+            <label class="text-xs text-gray-500">Ig</label>
             <input v-model="form.appointment_to" type="datetime-local"
               class="w-full border rounded-lg px-3 py-2 text-sm" />
           </div>
@@ -63,12 +63,12 @@ const submit = () => emit('save', { ...form })
       <div class="flex justify-between pt-2">
         <button v-if="!isNew"
           @click="emit('delete', appointment.id)"
-          class="text-red-500 text-sm hover:underline">
-          Cancel appointment
+          class="text-white text-sm bg-red-600 rounded-md px-3">
+          Lemondás
         </button>
         <button @click="submit"
           class="ml-auto bg-violet-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-violet-700">
-          {{ isNew ? 'Book' : 'Save changes' }}
+          {{ isNew ? 'Foglalás' : 'Mentés' }}
         </button>
       </div>
 
