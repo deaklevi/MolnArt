@@ -23,13 +23,26 @@ const isLoading    = ref(true)
 const showModal    = ref(false)
 const selectedAppt = ref<any>(null)
 const isNewBooking = ref(false)
+const selectedIds = ref<number[]>([])
 
 // ── Data fetching ──────────────────────────────────────────────────
+const { data: user, pending: userPending } = await useFetch(`${baseUrl}/api/user`, { 
+  key: 'user_services_view',
+  credentials: 'include',
+  server: false,
+  lazy: true
+})
 const getCsrfToken = (): string => {
   if (import.meta.server) return ''
   const match = document.cookie.match(new RegExp('(^| )XSRF-TOKEN=([^;]+)'))
   return match?.[2] ? decodeURIComponent(match[2]) : ''
 }
+
+watch(user as any, (newUser: any) => {
+  if (newUser?.services) {
+    selectedIds.value = newUser.services.map((s: any) => s.id)
+  }
+}, { immediate: true })
 
 async function fetchAppointments() {
   isLoading.value = true
@@ -46,6 +59,21 @@ async function fetchAppointments() {
     isLoading.value = false
   }
 }
+
+const { data: allServices, refresh: refreshAll, pending: servicesPending } = await useFetch(`${baseUrl}/api/services`, {
+  server: false,
+  lazy: true,
+  transform: (response:any) => response.data || response 
+})
+
+const userServices = computed(() => {
+  if (!allServices.value) return []
+
+  return allServices.value.filter((service: any) =>
+    selectedIds.value.includes(service.id)
+  )
+})
+
 
 // ── Map to FullCalendar event format ───────────────────────────────
 const calendarEvents = computed(() =>
@@ -193,6 +221,7 @@ onMounted(fetchAppointments)
       v-if="showModal"
       :appointment="selectedAppt"
       :is-new="isNewBooking"
+      :services="userServices"
       @save="handleSave"
       @delete="handleDelete"
       @close="showModal = false"
