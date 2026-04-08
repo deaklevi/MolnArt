@@ -25,11 +25,21 @@ const selectedAppt = ref<any>(null)
 const isNewBooking = ref(false)
 
 // ── Data fetching ──────────────────────────────────────────────────
+const getCsrfToken = (): string => {
+  if (import.meta.server) return ''
+  const match = document.cookie.match(new RegExp('(^| )XSRF-TOKEN=([^;]+)'))
+  return match?.[2] ? decodeURIComponent(match[2]) : ''
+}
+
 async function fetchAppointments() {
   isLoading.value = true
   try {
     const res = await $fetch<{ data: any[] }>(`${baseUrl}/api/appointments`, {
       credentials: 'include',
+      headers: {
+        'Accept': 'application/json',
+        'X-XSRF-TOKEN': getCsrfToken() ?? '',
+      },
     })
     appointments.value = res.data
   } finally {
