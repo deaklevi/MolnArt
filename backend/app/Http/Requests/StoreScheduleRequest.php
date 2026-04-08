@@ -5,14 +5,14 @@ namespace App\Http\Requests;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
-class UpdateServiceRequest extends FormRequest
+class StoreScheduleRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
     {
-        return true;
+        return false;
     }
 
     /**
@@ -23,8 +23,9 @@ class UpdateServiceRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['sometimes','string','max:50'],
-            'time' => ['sometimes','integer','min:1']
+            'day'   => ['required', 'integer', 'min:1', 'max:7'],
+            'start' => ['required', 'date_format:H:i'],
+            'end'   => ['required', 'date_format:H:i', 'after:start'],
         ];
     }
 }

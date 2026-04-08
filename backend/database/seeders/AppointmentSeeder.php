@@ -4,61 +4,66 @@ namespace Database\Seeders;
 
 use App\Models\Appointment;
 use App\Models\Customer;
+use App\Models\Product;
 use App\Models\User;
 use Carbon\Carbon;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
 class AppointmentSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
+    use WithoutModelEvents;
+
     public function run(): void
     {
-        // 1. Keressük meg azt a felhasználót (szolgáltatót), akihez a naptár tartozik.
-        // Itt feltételezzük, hogy az 1-es ID-jú user a naptár tulajdonosa.
-        $user = User::find(1);
+        $janos = User::where('user_name', 'admin_janos')->first();
 
-        if (!$user) {
-            $this->command->error('User nem található az 1-es ID-val!');
+        if (!$janos) {
+            $this->command->error('admin_janos user not found!');
             return;
         }
 
-        // --- 1. ADAT: FOGLALÁS MÁRA ---
-        // Létrehozzuk a vevőt a Customer táblában
-        $customer1 = Customer::create([
-            'name' => 'Kovács Gellért',
-            'email' => 'gellert@pelda.hu',
-            'phone_number' => '+36301112233',
-            'user_id' => $user->id, // A vevőt a szolgáltatóhoz kötjük
+        $anna = Customer::where('email', 'anna@example.com')->first();
+        $eva  = Customer::where('email', 'eva@example.com')->first();
+
+        if (!$anna || !$eva) {
+            $this->command->error('Customers not found!');
+            return;
+        }
+
+        $hairDye   = Product::where('name', 'Hair Dye')->first();
+        $shampoo   = Product::where('name', 'Shampoo')->first();
+        $hairSpray = Product::where('name', 'Hair Spray')->first();
+
+        if (!$hairDye || !$shampoo || !$hairSpray) {
+            $this->command->error('Products not found! Run ProductSeeder first.');
+            return;
+        }
+
+        $appt1 = Appointment::create([
+            'service'          => 'Klasszikus Hajvágás',
+            'customer_id'      => $anna->id,
+            'user_id'          => $janos->id,
+            'appointment_from' => Carbon::today()->setHour(9)->setMinute(15),
+            'appointment_to'   => Carbon::today()->setHour(10)->setMinute(0),
         ]);
 
-        // Létrehozzuk a hozzá tartozó foglalást
-        Appointment::create([
-            'service' => 'Klasszikus Hajvágás',
-            'customer_id' => $customer1->id, // Itt adjuk át a frissen létrehozott vevő ID-ját
-            'appointment_from' => Carbon::today()->setHour(9)->setMinute(15)->format('Y-m-d H:i:s'),
-            'appointment_to' => Carbon::today()->setHour(10)->setMinute(45)->format('Y-m-d H:i:s'),
+        $appt1->products()->attach([
+            $shampoo->id  => ['quantity' => 30],
+            $hairSpray->id => ['quantity' => 15],
         ]);
 
-        // --- 2. ADAT: FOGLALÁS HOLNAPRA ---
-        // Létrehozzuk a második vevőt
-        $customer2 = Customer::create([
-            'name' => 'Szabó Bence',
-            'email' => 'bence@pelda.hu',
-            'phone_number' => '+36204445566',
-            'user_id' => $user->id,
+        $appt2 = Appointment::create([
+            'service'          => 'Szakáll igazítás + Mosás',
+            'customer_id'      => $eva->id,
+            'user_id'          => $janos->id,
+            'appointment_from' => Carbon::tomorrow()->setHour(14)->setMinute(30),
+            'appointment_to'   => Carbon::tomorrow()->setHour(15)->setMinute(15),
         ]);
 
-        // Létrehozzuk a holnapi foglalást
-        Appointment::create([
-            'service' => 'Szakáll igazítás + Mosás',
-            'customer_id' => $customer2->id,
-            'appointment_from' => Carbon::tomorrow()->setHour(14)->setMinute(30)->format('Y-m-d H:i:s'),
-            'appointment_to' => Carbon::tomorrow()->setHour(15)->setMinute(15)->format('Y-m-d H:i:s'),
+        $appt2->products()->attach([
+            $hairDye->id  => ['quantity' => 120],
+            $shampoo->id  => ['quantity' => 50],
         ]);
-
-        $this->command->info('A két teszt foglalás és a vevők sikeresen létrehozva!');
     }
 }
