@@ -22,7 +22,7 @@ const form = reactive({
   user_id: props.appointment.user_id ?? null,
 })
 
-let products = props.appointment.products ?? [];
+const products = ref([...(props.appointment.products ?? [])])
 
 console.log(products)
 const submit = () => emit('save', { ...form })
@@ -65,12 +65,15 @@ const submit = () => emit('save', { ...form })
 
       <!-- products -->
       <h2 class="pt-2 text-md font-semibold">Használt termékek</h2>
-      <div class="min-h-[15rem]">
+      <div class="h-[15rem] flex flex-col gap-2 overflow-y-auto">
         <AppointmentProductCard  
-          v-for="product in products"
+          v-for="(product,i) in products"
           :key="product.id"
           :product="product"
+          @update:quantity="products[i].quantity = $event"
+          @remove="products.splice(i, 1)"
           class="mb-2"
+          
         />
         
       </div>
