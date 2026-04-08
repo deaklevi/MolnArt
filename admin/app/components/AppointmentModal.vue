@@ -12,22 +12,25 @@ const emit = defineEmits<{
 }>()
 
 const form = reactive({
-  service:          props.appointment.service          ?? '',
+  service: props.appointment.service ?? '',
   appointment_from: props.appointment.appointment_from ?? '',
-  appointment_to:   props.appointment.appointment_to   ?? '',
-  name:             props.appointment.customer?.name         ?? '',
-  email:            props.appointment.customer?.email        ?? '',
-  phone_number:     props.appointment.customer?.phone_number ?? '',
-  customer_id:      props.appointment.customer?.id           ?? null,
-  user_id:          props.appointment.user_id                ?? null,
+  appointment_to: props.appointment.appointment_to   ?? '',
+  name: props.appointment.customer?.name ?? '',
+  email: props.appointment.customer?.email ?? '',
+  phone_number: props.appointment.customer?.phone_number ?? '',
+  customer_id: props.appointment.customer?.id ?? null,
+  user_id: props.appointment.user_id ?? null,
 })
 
+let products = props.appointment.products ?? [];
+
+console.log(products)
 const submit = () => emit('save', { ...form })
 </script>
 
 <template>
   <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-    <div class="bg-white rounded-xl shadow-xl w-full max-w-md p-6 space-y-4">
+    <div class="bg-white rounded-xl shadow-xl w-full max-w-lg p-6 space-y-4">
 
       <div class="flex justify-between items-center">
         <h2 class="text-lg font-semibold">
@@ -37,11 +40,11 @@ const submit = () => emit('save', { ...form })
       </div>
 
       <div class="space-y-3">
-        <input v-model="form.service"      placeholder="Service"
+        <input v-model="form.service" placeholder="Service"
           class="w-full border rounded-lg px-3 py-2 text-sm" />
-        <input v-model="form.name"         placeholder="Customer name"
+        <input v-model="form.name" placeholder="Customer name"
           class="w-full border rounded-lg px-3 py-2 text-sm" />
-        <input v-model="form.email"        placeholder="Email"
+        <input v-model="form.email" placeholder="Email"
           class="w-full border rounded-lg px-3 py-2 text-sm" />
         <input v-model="form.phone_number" placeholder="Phone"
           class="w-full border rounded-lg px-3 py-2 text-sm" />
@@ -60,7 +63,21 @@ const submit = () => emit('save', { ...form })
         </div>
       </div>
 
-      <div class="flex justify-between pt-2">
+      <!-- products -->
+      <h2 class="pt-2 text-md font-semibold">Használt termékek</h2>
+      <div class="min-h-[15rem]">
+        <AppointmentProductCard  
+          v-for="product in products"
+          :key="product.id"
+          :product="product"
+          class="mb-2"
+        />
+        
+      </div>
+
+
+      <!-- gombok -->
+      <div class="flex justify-between pt-5">
         <button v-if="!isNew"
           @click="emit('delete', appointment.id)"
           class="text-white text-sm bg-red-600 rounded-md px-3">
