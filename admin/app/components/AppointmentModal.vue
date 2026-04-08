@@ -90,20 +90,13 @@ function handleSelect(number: number){
           v-for="(product,i) in products"
           :key="product.id"
           :product="product"
+          :orderNum="i"
           @update:quantity="products[i].quantity = $event"
           @remove="products.splice(i, 1)"
           class="mb-2"
           
         />
-                <AppointmentProductCard  
-          v-for="(product,i) in products"
-          :key="product.id"
-          :product="product"
-          @update:quantity="products[i].quantity = $event"
-          @remove="products.splice(i, 1)"
-          class="mb-2"
-          
-        />
+
 
       </div>
       <div class="flex justify-between pt-5">
