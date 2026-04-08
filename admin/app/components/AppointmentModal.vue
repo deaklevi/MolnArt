@@ -25,7 +25,12 @@ const form = reactive({
 const products = ref([...(props.appointment.products ?? [])])
 
 
-const submit = () => emit('save', { ...form })
+const submit = () => emit('save', { ...form,
+  used_products: products.value.map((p:any)=>({
+    product_id: p.id,
+    quantity: p.quantity,
+  }))
+})
 
 let selection = ref(0);
 function handleSelect(number: number){
@@ -116,7 +121,7 @@ function handleSelect(number: number){
     <div v-if="selection === 1">
       <h2 class="text-lg font-semibold">Állitsd be mettől meddig lehet foglalni</h2>
 
-
+      <ScheduleModalSection />
       
     </div>
 

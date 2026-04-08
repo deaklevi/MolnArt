@@ -38,7 +38,7 @@ class AppointmentService
                 [
                     'name'         => $data['name'],
                     'phone_number' => $data['phone_number'],
-                    'user_id'      => $data['worker_id'], // default stylist
+                    'user_id'      => $data['worker_id'], 
                 ]
             );
 
@@ -75,7 +75,7 @@ class AppointmentService
                     'name'        => $customer->name,
                     'service'     => $appointment->service,
                     'start'       => $appointment->appointment_from->format('Y-m-d H:i'),
-                    'worker_name' => $worker?->user_name ?? 'Our stylist',
+                    'worker_name' => $worker?->user_name ?? '',
                 ]));
             } catch (\Exception $e) {
                 Log::warning('Appointment email failed: ' . $e->getMessage());

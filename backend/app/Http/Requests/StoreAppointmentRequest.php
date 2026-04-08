@@ -31,6 +31,9 @@ class StoreAppointmentRequest extends FormRequest
             'name' => ['sometimes', 'string', 'max:100'],
             'email' => ['required', 'email', 'max:100'],
             'phone_number' => ['sometimes', 'string', 'max:20'],
+            'used_products' => ['sometimes', 'array'],
+            'used_products.*.product_id' => ['required_with:used_products', 'exists:products,id'],
+            'used_products.*.quantity' => ['required_with:used_products', 'numeric', 'min:0'],
         ];
     }
 }
