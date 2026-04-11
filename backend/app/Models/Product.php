@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Product extends Model
 {
-    protected $fillable = ['name','unit','stock'];
+    protected $fillable = ['name','unit','type','stock',];
 
     public function appointments() :BelongsToMany{
         return $this->belongsToMany(Appointment::class)->withPivot('quantity')->as('usage');
