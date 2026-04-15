@@ -11,53 +11,41 @@ use App\Services\ScheduleService;
 class ScheduleController extends Controller
 {
 
-    public function __construct(protected ScheduleService $service) {}
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    public function index(Request $request)
     {
-        return ScheduleResource::collection(Schedule::with('user')->get());
+        
+        $query = Schedule::where('user_id', $request->user()->id);
+
+        if ($request->filled('from') && $request->filled('to')) {
+            $query->whereBetween('date', [$request->from, $request->to]);
+        }
+
+        return ScheduleResource::collection($query->orderBy('date')->get());
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(StoreScheduleRequest $request): ScheduleResource
+    public function store(StoreScheduleRequest $request, ScheduleService $service): ScheduleResource
     {
-        $schedule = $this->service->create(
-            $request->user(),
-            $request->validated()
-        );
+        $this->authorize('create', Schedule::class);
+        $schedule = $service->create($request->user(), $request->validated());
 
         return new ScheduleResource($schedule);
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Schedule $schedule)
+    public function show(Schedule $schedule): ScheduleResource
     {
         return new ScheduleResource($schedule->load('user'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(UpdateScheduleRequest $request, Schedule $schedule)
+    public function update(UpdateScheduleRequest $request, Schedule $schedule, ScheduleService $service)
     {
-        $this->authorize('update',$schedule);
-        
-        $schedule = $this->service->update($schedule,$request->validated());
+        $this->authorize('update', $schedule);
+        $schedule = $service->update($schedule, $request->validated());
         return new ScheduleResource($schedule);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(Schedule $schedule)
     {
-        $this->authorize('delete',$schedule);
+        $this->authorize('delete', $schedule);
         $schedule->delete();
         return response()->noContent();
     }
