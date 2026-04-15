@@ -71,7 +71,7 @@ function handleSelect(number: number){
 
     
       <div class="flex-1 overflow-y-auto pt-3">
-    <div id="appointment" v-if="selection=== 0">
+        <div id="appointment" v-if="selection=== 0">
         <div class="flex justify-between items-center">
         <h2 class="text-lg font-semibold mb-6">
           {{ isNew ? 'Időpont hozzáadása' : 'Időpont szerkesztés' }}
@@ -148,17 +148,17 @@ function handleSelect(number: number){
           {{ isNew ? 'Foglalás' : 'Mentés' }}
         </button>
       </div>
-      </div>
+        </div>
 
+        <div v-if="selection === 1" class="space-y-3">
+          <h2 class="text-lg font-semibold">Állitsd be mettől meddig lehet foglalni</h2>
+    
+          
+          <ScheduleModalSection />
+          
+        </div>
     </div>
       
-    <div v-if="selection === 1" class="space-y-3">
-      <h2 class="text-lg font-semibold">Állitsd be mettől meddig lehet foglalni</h2>
-
-      
-      <ScheduleModalSection />
-      
-    </div>
 
     <div v-if="selection ===3"></div>
 
