@@ -60,20 +60,23 @@ function handleSelect(number: number){
 
   <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
     
-    <div class="bg-white rounded-xl shadow-xl w-full max-w-lg min-h-[75%] p-6 space-y-4">
-      
-      <div class="flex flex-row justify-around pb-4">
+    <div class="bg-white rounded-xl shadow-xl w-full max-w-lg h-[90vh] flex flex-col p-4">
+      <div class="flex flex-row justify-around pb-4 border-b">
         <h2 class="cursor-pointer hover:underline" @click="handleSelect(0)">Időpont</h2>
         <h2 class="cursor-pointer hover:underline" @click="handleSelect(1)">Foglalhatóság</h2>
         <h2 class="cursor-pointer hover:underline" @click="handleSelect(2)">Egyéb elfoglaltság</h2>
+        <button @click="emit('close')" class="text-gray-400 hover:text-gray-600">✕</button>
       </div>
+      
 
+    
+      <div class="flex-1 overflow-y-auto pt-3">
     <div id="appointment" v-if="selection=== 0">
         <div class="flex justify-between items-center">
         <h2 class="text-lg font-semibold mb-6">
           {{ isNew ? 'Időpont hozzáadása' : 'Időpont szerkesztés' }}
         </h2>
-        <button @click="emit('close')" class="text-gray-400 hover:text-gray-600">✕</button>
+       
       </div>
 
       <div class="space-y-4">
@@ -145,16 +148,19 @@ function handleSelect(number: number){
           {{ isNew ? 'Foglalás' : 'Mentés' }}
         </button>
       </div>
+      </div>
 
     </div>
       
-    <div v-if="selection === 1">
+    <div v-if="selection === 1" class="space-y-3">
       <h2 class="text-lg font-semibold">Állitsd be mettől meddig lehet foglalni</h2>
 
+      
       <ScheduleModalSection />
       
     </div>
 
+    <div v-if="selection ===3"></div>
 
     </div>
   </div>
