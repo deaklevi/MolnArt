@@ -14,10 +14,12 @@ return new class extends Migration
         Schema::create('schedules', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-            $table->tinyInteger('day');
+            $table->date('date');
             $table->time('start');
             $table->time('end');
             $table->timestamps();
+
+            $table->unique(['user_id', 'date']);
         });
     }
 

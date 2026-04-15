@@ -12,7 +12,7 @@ class UpdateScheduleRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -23,7 +23,6 @@ class UpdateScheduleRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'day'   => ['sometimes', 'integer', 'min:1', 'max:7'],
             'start' => ['sometimes', 'date_format:H:i'],
             'end'   => ['sometimes', 'date_format:H:i', 'after:start'],
         ];

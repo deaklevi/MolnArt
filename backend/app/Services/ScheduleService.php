@@ -9,13 +9,13 @@ class ScheduleService
 {
     public function hasOverlap(
         int $userId,
-        int $day,
+        string $date,
         string $start,
         string $end,
         ?int $excludeId = null
     ): bool {
         return Schedule::where('user_id', $userId)
-            ->where('day', $day)
+            ->where('date', $date)
             ->when($excludeId, fn($q) => $q->where('id', '!=', $excludeId))
             ->where('start', '<', $end)
             ->where('end', '>', $start)
@@ -24,15 +24,20 @@ class ScheduleService
 
     public function create(User $user, array $data): Schedule
     {
-        if ($this->hasOverlap($user->id, $data['day'], $data['start'], $data['end'])) {
+        if ($this->hasOverlap(
+            $user->id,
+            $data['date'],
+            $data['start'],
+            $data['end']
+        )) {
             throw new \InvalidArgumentException(
-                'This time slot overlaps with an existing schedule.'
+                'Ez az időpont ütközik egy meglévővel.'
             );
         }
 
         return Schedule::create([
             'user_id' => $user->id,
-            'day'     => $data['day'],
+            'date'    => $data['date'],
             'start'   => $data['start'],
             'end'     => $data['end'],
         ]);
@@ -40,17 +45,27 @@ class ScheduleService
 
     public function update(Schedule $schedule, array $data): Schedule
     {
-        $day   = $data['day']   ?? $schedule->day;
+        $date  = $data['date']  ?? $schedule->date->toDateString();
         $start = $data['start'] ?? $schedule->start;
         $end   = $data['end']   ?? $schedule->end;
 
-        if ($this->hasOverlap($schedule->user_id, $day, $start, $end, $schedule->id)) {
+        if ($this->hasOverlap(
+            $schedule->user_id,
+            $date,
+            $start,
+            $end,
+            $schedule->id
+        )) {
             throw new \InvalidArgumentException(
-                'This time slot overlaps with an existing schedule.'
+                'Ez az időpont ütközik egy meglévővel.'
             );
         }
 
-        $schedule->update($data);
+        $schedule->update([
+            'date'  => $date,
+            'start' => $start,
+            'end'   => $end,
+        ]);
 
         return $schedule->fresh();
     }

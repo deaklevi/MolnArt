@@ -12,7 +12,7 @@ class StoreScheduleRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -23,7 +23,7 @@ class StoreScheduleRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'day'   => ['required', 'integer', 'min:1', 'max:7'],
+            'date'  => ['required', 'date_format:Y-m-d'],
             'start' => ['required', 'date_format:H:i'],
             'end'   => ['required', 'date_format:H:i', 'after:start'],
         ];
