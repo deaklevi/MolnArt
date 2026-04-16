@@ -130,10 +130,10 @@ const calendarOptions = computed<CalendarOptions>(() => ({
   nowIndicator: true,
   selectMirror: true,
 
-  slotMinTime: '06:00:00',
-  slotMaxTime: '22:00:00',
+  slotMinTime: '07:00:00',
+  slotMaxTime: '21:30:00',
   allDaySlot: false,
-  height: 'auto',
+  height: '85%',
 
   eventClick: handleEventClick,
   eventDrop: handleEventDrop,
@@ -160,6 +160,13 @@ const calendarOptions = computed<CalendarOptions>(() => ({
 
   locale: 'hu',
   timeZone: 'UTC',
+  slotDuration: '00:30:00',
+  slotLabelInterval: '00:30:00',
+  snapDuration: '00:05:00',
+  contentHeight: 'auto',
+  expandRows: true,
+
+
 }))
 
 // ── HANDLERS ─────────────────────────────────────────
@@ -286,13 +293,13 @@ onMounted(fetchAppointments)
 </script>
 
 <template>
-  <div class="p-6">
+  <div class="p-6 h-screen flex flex-col">
     <div v-if="isLoading" class="text-center py-20 text-gray-400">
       Loading appointments...
     </div>
 
-    <ClientOnly v-else>
-      <FullCalendar :options="calendarOptions" />
+    <ClientOnly v-else class="flex-1">
+      <FullCalendar :options="calendarOptions" class="h-full" />
     </ClientOnly>
 
     <AppointmentModal
