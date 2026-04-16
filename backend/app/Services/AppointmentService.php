@@ -50,18 +50,18 @@ class AppointmentService
             ]);
 
             // 4. Attach products + deduct stock (NO quantity anymore)
-            foreach ($data['used_products'] ?? [] as $productId) {
-                $product = Product::lockForUpdate()->findOrFail($productId);
-
-                if ($product->stock <= 0) {
-                    throw new \RuntimeException(
-                        "Out of stock: {$product->name}"
-                    );
+            foreach ($data['used_products'] ?? [] as $item) {
+                $product = Product::lockForUpdate()->findOrFail($item['product_id']);
+    
+                if ($product->stock < $item['quantity']) {
+                    throw new \RuntimeException("Out of stock: {$product->name}");
                 }
-
-                $appointment->products()->attach($product->id);
-
-                $product->decrement('stock', 1); // default usage = 1
+    
+                $appointment->products()->attach($product->id, [
+                    'quantity' => $item['quantity'],
+                ]);
+    
+                $product->decrement('stock', $item['quantity']);
             }
 
             // 5. Send email (safe)

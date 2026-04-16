@@ -99,6 +99,7 @@ async function fetchAppointments() {
   }
 }
 
+
 // ── EVENTS ────────────────────────────────────────────
 const calendarEvents = computed(() =>
   appointments.value.map((appt) => ({
