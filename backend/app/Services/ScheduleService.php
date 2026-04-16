@@ -2,71 +2,92 @@
 
 namespace App\Services;
 
-use App\Models\Schedule;
+use App\Http\Requests\StoreAppointmentRequest;
+use App\Models\Appointment;
+use App\Models\Customer;
+use App\Models\Product;
 use App\Models\User;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
-class ScheduleService
+class AppointmentService
 {
-    public function hasOverlap(
-        int $userId,
-        string $date,
-        string $start,
-        string $end,
-        ?int $excludeId = null
-    ): bool {
-        return Schedule::where('user_id', $userId)
-            ->where('date', $date)
-            ->when($excludeId, fn($q) => $q->where('id', '!=', $excludeId))
-            ->where('start', '<', $end)
-            ->where('end', '>', $start)
-            ->exists();
-    }
-
-    public function create(User $user, array $data): Schedule
+    public function book(StoreAppointmentRequest $request): Appointment
     {
-        if ($this->hasOverlap(
-            $user->id,
-            $data['date'],
-            $data['start'],
-            $data['end']
-        )) {
-            throw new \InvalidArgumentException(
-                'Ez az időpont ütközik egy meglévővel.'
+        return DB::transaction(function () use ($request) {
+
+            $data = $request->validated();
+
+            // ── 1. TIME CONFLICT CHECK ─────────────────────
+            $conflict = Appointment::where('appointment_from', '<', $data['appointment_to'])
+                ->where('appointment_to', '>', $data['appointment_from'])
+                ->where('user_id', $data['user_id']) // IMPORTANT: per user
+                ->exists();
+
+            if ($conflict) {
+                abort(422, 'This time slot is already booked.');
+            }
+
+            // ── 2. CUSTOMER ───────────────────────────────
+            $customer = Customer::updateOrCreate(
+                ['email' => $data['email']],
+                [
+                    'name'         => $data['name'] ?? '',
+                    'phone_number' => $data['phone_number'] ?? '',
+                    'user_id'      => $data['user_id'],
+                ]
             );
-        }
 
-        return Schedule::create([
-            'user_id' => $user->id,
-            'date'    => $data['date'],
-            'start'   => $data['start'],
-            'end'     => $data['end'],
-        ]);
-    }
+            // ── 3. CREATE APPOINTMENT ─────────────────────
+            $appointment = Appointment::create([
+                'appointment_from' => $data['appointment_from'],
+                'appointment_to'   => $data['appointment_to'],
+                'service'          => $data['service'],
+                'customer_id'      => $customer->id,
+                'user_id'          => $data['user_id'], // IMPORTANT
+            ]);
 
-    public function update(Schedule $schedule, array $data): Schedule
-    {
-        $date  = $data['date']  ?? $schedule->date->toDateString();
-        $start = $data['start'] ?? $schedule->start;
-        $end   = $data['end']   ?? $schedule->end;
+            // ── 4. HANDLE PRODUCTS (NO PIVOT QUANTITY) ────
+            if (!empty($data['used_products'])) {
 
-        if ($this->hasOverlap(
-            $schedule->user_id,
-            $date,
-            $start,
-            $end,
-            $schedule->id
-        )) {
-            throw new \InvalidArgumentException(
-                'Ez az időpont ütközik egy meglévővel.'
-            );
-        }
+                $productIds = [];
 
-        $schedule->update([
-            'date'  => $date,
-            'start' => $start,
-            'end'   => $end,
-        ]);
+                foreach ($data['used_products'] as $item) {
 
-        return $schedule->fresh();
+                    $product = Product::lockForUpdate()->findOrFail($item['product_id']);
+
+                    $usedAmount = $item['quantity'] ?? 1; // fallback if not provided
+
+                    if ($product->stock < $usedAmount) {
+                        abort(422, "Not enough stock for {$product->name}");
+                    }
+
+                    // deduct stock
+                    $product->decrement('stock', $usedAmount);
+
+                    $productIds[] = $product->id;
+                }
+
+                // attach WITHOUT pivot data
+                $appointment->products()->sync($productIds);
+            }
+
+            // ── 5. EMAIL ──────────────────────────────────
+            $worker = User::find($data['user_id']);
+
+            try {
+                Mail::to($customer->email)->send(new \App\Mail\AppointmentBooked([
+                    'name'        => $customer->name,
+                    'service'     => $appointment->service,
+                    'start'       => $appointment->appointment_from->format('Y-m-d H:i'),
+                    'worker_name' => $worker?->user_name ?? '',
+                ]));
+            } catch (\Exception $e) {
+                Log::warning('Appointment email failed: ' . $e->getMessage());
+            }
+
+            return $appointment->load('customer', 'products');
+        });
     }
 }

@@ -6,8 +6,20 @@ const props = defineProps<{
   services: { id: number; name: string }[]
 }>()
 
+type AppointmentForm = {
+  appointment_from: string
+  appointment_to: string
+  service?: string
+  customer_id?: number | null
+  user_id?: number | null
+  email?: string
+  name?: string
+  phone_number?: string
+  used_products?: any[]
+}
+
 const emit = defineEmits<{
-  save:   [data: object]
+  save:   [data: AppointmentForm]
   delete: [id: number]
   close:  []
 }>()
@@ -42,12 +54,13 @@ const form = reactive({
 const products = ref([...(props.appointment.products ?? [])])
 
 
-const submit = () => emit('save', { ...form,
+const submit = () => emit('save', {
+  ...form,
   used_products: products.value.map((p:any)=>({
     product_id: p.id,
     quantity: p.quantity,
   }))
-})
+} as AppointmentForm)
 
 let selection = ref(0);
 function handleSelect(number: number){
@@ -123,8 +136,10 @@ function handleSelect(number: number){
       </div>
       
       <!-- products -->
-      <h2 class="pt-2 text-md font-semibold my-3">Használt termékek</h2>
-      <div class="h-[15rem] flex flex-col gap-2 overflow-y-auto">
+      <div class="flex flex-row">
+        <h2 class="pt-2 text-md font-semibold my-3">Használt termékek</h2>
+      </div>
+      <div class="h-[20rem] flex flex-col gap-2 overflow-y-auto">
         <AppointmentProductCard  
           v-for="(product,i) in products"
           :key="product.id"
@@ -137,7 +152,7 @@ function handleSelect(number: number){
         />
 
       </div>
-      <div class="flex justify-between pt-5">
+      <div class="flex justify-between pt-10">
         <button v-if="!isNew"
           @click="emit('delete', appointment.id)"
           class="text-white text-sm bg-red-600 rounded-md px-3">
@@ -157,12 +172,13 @@ function handleSelect(number: number){
           <ScheduleModalSection />
           
         </div>
-    </div>
+
+        <div v-if="selection ===3"></div>
+    
+        </div>
+      </div>
       
 
-    <div v-if="selection ===3"></div>
-
-    </div>
   </div>
 
 
