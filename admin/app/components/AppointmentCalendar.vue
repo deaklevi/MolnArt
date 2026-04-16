@@ -139,8 +139,7 @@ const calendarOptions = computed<CalendarOptions>(() => ({
   eventDrop: handleEventDrop,
   eventResize: handleEventResize,
   select: handleSlotSelect,
-
-  // ✅ 24-hour format
+  
   slotLabelFormat: {
     hour: '2-digit',
     minute: '2-digit',
@@ -160,7 +159,7 @@ const calendarOptions = computed<CalendarOptions>(() => ({
   },
 
   locale: 'hu',
-  timeZone: 'local',
+  timeZone: 'UTC',
 }))
 
 // ── HANDLERS ─────────────────────────────────────────
