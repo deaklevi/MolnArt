@@ -15,6 +15,7 @@ import type { EventResizeDoneArg } from '@fullcalendar/interaction'
 
 const config = useRuntimeConfig()
 const baseUrl = config.public.apiBase
+const calendarRef = ref<any>(null)
 
 // ── TYPES ─────────────────────────────────────────────
 type AppointmentForm = {
@@ -36,6 +37,26 @@ const showModal    = ref(false)
 const selectedAppt = ref<any>(null)
 const isNewBooking = ref(false)
 const selectedIds  = ref<number[]>([])
+
+const isMobile = ref(false)
+
+
+const checkView = () => {
+  const isMobile = window.innerWidth < 768
+
+  const api = calendarRef.value?.getApi?.()
+  if (!api) return
+
+  const currentView = api.view.type
+
+  if (isMobile && currentView !== 'timeGridDay') {
+    api.changeView('timeGridDay')
+  }
+
+  if (!isMobile && currentView === 'timeGridDay') {
+    api.changeView('timeGridWeek')
+  }
+}
 
 // ── HELPERS ───────────────────────────────────────────
 
@@ -121,7 +142,7 @@ const calendarOptions = computed<CalendarOptions>(() => ({
   headerToolbar: {
     left: 'prev,next today',
     center: 'title',
-    right: 'dayGridMonth,timeGridWeek,timeGridDay',
+    right: isMobile.value ? 'timeGridDay' : 'timeGridWeek,timeGridDay',
   },
 
   events: calendarEvents.value,
@@ -288,7 +309,18 @@ async function handleDelete(id: number) {
   await fetchAppointments()
 }
 
-onMounted(fetchAppointments)
+onMounted(() => {
+  fetchAppointments()
+
+  checkView()
+
+  window.addEventListener('resize', checkView)
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', checkView)
+})
+
 
 </script>
 
@@ -299,7 +331,7 @@ onMounted(fetchAppointments)
     </div>
 
     <ClientOnly v-else class="flex-1">
-      <FullCalendar :options="calendarOptions" class="h-full" />
+      <FullCalendar ref="calendarRef" :options="calendarOptions" class="h-full" />
     </ClientOnly>
 
     <AppointmentModal
