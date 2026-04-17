@@ -48,13 +48,11 @@ const checkView = () => {
   if (!api) return
 
   const currentView = api.view.type
+  const targetView = isMobile.value ? 'timeGridDay' : 'timeGridWeek'
 
-  if (isMobile && currentView !== 'timeGridDay') {
-    api.changeView('timeGridDay')
-  }
-
-  if (!isMobile && currentView === 'timeGridDay') {
-    api.changeView('timeGridWeek')
+  // Only change if needed — avoid unnecessary re-renders
+  if (currentView !== targetView) {
+    api.changeView(targetView)
   }
 }
 
@@ -140,7 +138,7 @@ const calendarEvents = computed(() =>
 // ── CALENDAR CONFIG ───────────────────────────────────
 const calendarOptions = computed<CalendarOptions>(() => ({
   plugins: [timeGridPlugin, dayGridPlugin, interactionPlugin],
-  initialView: isMobile.value ? 'timeGridDay' : 'timeGridWeek',
+  initialView: 'timeGridWeek',
 
   headerToolbar: isMobile.value
   ?{
@@ -328,11 +326,11 @@ async function handleDelete(id: number) {
 }
 
 onMounted(() => {
-  fetchAppointments()
-
-  checkView()
-
+  nextTick(() => {
+    checkView()
+  })
   window.addEventListener('resize', checkView)
+  fetchAppointments()
 })
 
 onBeforeUnmount(() => {
