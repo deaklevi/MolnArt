@@ -42,7 +42,7 @@ const isMobile = ref(false)
 
 
 const checkView = () => {
-  const isMobile = window.innerWidth < 768
+  isMobile.value = window.innerWidth < 768
 
   const api = calendarRef.value?.getApi?.()
   if (!api) return
@@ -140,9 +140,15 @@ const calendarEvents = computed(() =>
 // ── CALENDAR CONFIG ───────────────────────────────────
 const calendarOptions = computed<CalendarOptions>(() => ({
   plugins: [timeGridPlugin, dayGridPlugin, interactionPlugin],
-  initialView: 'timeGridWeek',
+  initialView: isMobile.value ? 'timeGridDay' : 'timeGridWeek',
 
-  headerToolbar: {
+  headerToolbar: isMobile.value
+  ?{
+    left: 'prev,next',
+    center:'title',
+    right:'today'
+  } 
+  :{
     left: 'prev,next today',
     center: 'title',
     right: isMobile.value ? 'timeGridDay' : 'timeGridWeek,timeGridDay',
@@ -198,6 +204,8 @@ const calendarOptions = computed<CalendarOptions>(() => ({
   eventStartEditable: true,
   eventDurationEditable: true,
 
+
+  titleFormat: isMobile.value ? {month:'short', day:'numeric'} : { year: 'numeric', month: 'long', day: 'numeric' }
 }))
 
 // ── HANDLERS ─────────────────────────────────────────
