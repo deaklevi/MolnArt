@@ -117,6 +117,9 @@ async function fetchAppointments() {
     appointments.value = res.data
   } finally {
     isLoading.value = false
+    nextTick(() =>{
+      checkView();
+    })
   }
 }
 
@@ -186,7 +189,14 @@ const calendarOptions = computed<CalendarOptions>(() => ({
   snapDuration: '00:05:00',
   contentHeight: 'auto',
   expandRows: true,
+  
 
+  //mobile events
+  longPressDelay: 300,
+  eventLongPressDelay: 300,
+  selectLongPressDelay: 300,
+  eventStartEditable: true,
+  eventDurationEditable: true,
 
 }))
 
