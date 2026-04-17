@@ -35,10 +35,10 @@ class AppointmentController extends Controller
 
     public function store(StoreAppointmentRequest $request): AppointmentResource
     {
-        $appointment = $this->service->book($request);
-
+        $appointment = $this->service->book($request, Auth::id());
+    
         return new AppointmentResource($appointment);
-    }
+    }   
 
     public function update(UpdateAppointmentRequest $request, Appointment $appointment): AppointmentResource
     {

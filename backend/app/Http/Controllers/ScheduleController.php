@@ -8,25 +8,21 @@ use App\Http\Resources\ScheduleResource;
 use App\Models\Schedule;
 use Illuminate\Http\Request;
 use App\Services\ScheduleService;
+use Illuminate\Support\Facades\Auth;
 class ScheduleController extends Controller
 {
 
-    public function index(Request $request)
+    public function index(Request $request, ScheduleService $service)
     {
-        
-        $query = Schedule::where('user_id', $request->user()->id);
-
-        if ($request->filled('from') && $request->filled('to')) {
-            $query->whereBetween('date', [$request->from, $request->to]);
-        }
-
-        return ScheduleResource::collection($query->orderBy('date')->get());
+        return ScheduleResource::collection(
+            $service->getUserSchedule($request->user()->id)
+        );
     }
 
     public function store(StoreScheduleRequest $request, ScheduleService $service): ScheduleResource
     {
         $this->authorize('create', Schedule::class);
-        $schedule = $service->create($request->user(), $request->validated());
+        $schedule = $service->create(Auth::id(), $request->validated());
 
         return new ScheduleResource($schedule);
     }
