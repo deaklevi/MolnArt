@@ -27,7 +27,7 @@ class User extends Authenticatable
         'profile_image',
     ];
 
-    // Ezzel mondjuk meg a Laravelnek, hogy ne az emailt keresse login-kor
+    
     public function findForPassport($username) {
         return $this->where('user_name', $username)->first();
     }
@@ -43,7 +43,6 @@ class User extends Authenticatable
 
     public function services()
     {
-        // A 'withTimestamps' azért kell, ha látni akarjuk, mikor rendelték hozzá
         return $this->belongsToMany(Service::class);
     }
 
@@ -52,10 +51,15 @@ class User extends Authenticatable
         return $this->hasManyThrough(
             Appointment::class, 
             Customer::class,
-            'user_id',     // Foreign key a customers táblán
-            'customer_id', // Foreign key az appointments táblán
-            'id',          // Local key a users táblán
-            'id'           // Local key a customers táblán
+            'user_id',     
+            'customer_id', 
+            'id',          
+            'id'           
         );
+    }
+
+    public function unavailabilities()
+    {
+        return $this->hasMany(Unavailability::class);
     }
 }

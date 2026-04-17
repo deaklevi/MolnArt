@@ -10,7 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ScheduleController;
-
+use App\Http\Controllers\UnavailabilityController;
 
 // Nyilvános
 Route::get('/auth/google/redirect', [GoogleController::class, 'redirectToGoogle']);
@@ -41,4 +41,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', function (Request $request) {
         return response()->json($request->user()->load('services'));
     });
+
+    Route::apiResource('unavailabilities', UnavailabilityController::class);
 });
