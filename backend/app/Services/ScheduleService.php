@@ -3,55 +3,35 @@
 namespace App\Services;
 
 use App\Models\Schedule;
-use App\Models\User;
 
 class ScheduleService
 {
-    public function hasOverlap(
-        int $userId,
-        int $day,
-        string $start,
-        string $end,
-        ?int $excludeId = null
-    ): bool {
+    public function getUserSchedule(int $userId)
+    {
         return Schedule::where('user_id', $userId)
-            ->where('day', $day)
-            ->when($excludeId, fn($q) => $q->where('id', '!=', $excludeId))
-            ->where('start', '<', $end)
-            ->where('end', '>', $start)
+            ->orderBy('date')
+            ->get();
+    }
+
+    public function isAvailable(int $userId, string $from, string $to): bool
+    {
+        return Schedule::where('user_id', $userId)
+            ->where('date', '<=', $from)
+            ->where('date', '>=', $to)
             ->exists();
     }
 
-    public function create(User $user, array $data): Schedule
+    public function create(int $userId, array $data): Schedule
     {
-        if ($this->hasOverlap($user->id, $data['day'], $data['start'], $data['end'])) {
-            throw new \InvalidArgumentException(
-                'This time slot overlaps with an existing schedule.'
-            );
-        }
-
         return Schedule::create([
-            'user_id' => $user->id,
-            'day'     => $data['day'],
-            'start'   => $data['start'],
-            'end'     => $data['end'],
+            'user_id' => $userId,
+            ...$data
         ]);
     }
 
     public function update(Schedule $schedule, array $data): Schedule
     {
-        $day   = $data['day']   ?? $schedule->day;
-        $start = $data['start'] ?? $schedule->start;
-        $end   = $data['end']   ?? $schedule->end;
-
-        if ($this->hasOverlap($schedule->user_id, $day, $start, $end, $schedule->id)) {
-            throw new \InvalidArgumentException(
-                'This time slot overlaps with an existing schedule.'
-            );
-        }
-
         $schedule->update($data);
-
-        return $schedule->fresh();
+        return $schedule;
     }
 }

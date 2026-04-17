@@ -6,8 +6,27 @@ const props = defineProps<{
   services: { id: number; name: string }[]
 }>()
 
+const showProductModal = ref(false)
+const allProducts = ref<any[]>([])
+
+const config = useRuntimeConfig()
+const baseUrl = config.public.apiBase
+
+
+type AppointmentForm = {
+  appointment_from: string
+  appointment_to: string
+  service?: string
+  customer_id?: number | null
+  user_id?: number | null
+  email?: string
+  name?: string
+  phone_number?: string
+  used_products?: any[]
+}
+
 const emit = defineEmits<{
-  save:   [data: object]
+  save:   [data: AppointmentForm]
   delete: [id: number]
   close:  []
 }>()
@@ -39,41 +58,70 @@ const form = reactive({
   user_id: props.appointment.user_id ?? null,
 })
 
-const products = ref([...(props.appointment.products ?? [])])
+const products = ref<any[]>(
+  (props.appointment.products ?? []).map((p: any) => ({
+    ...p,
+    quantity: p.quantity ?? 1
+  }))
+)
 
 
-const submit = () => emit('save', { ...form,
+const submit = () => emit('save', {
+  ...form,
   used_products: products.value.map((p:any)=>({
     product_id: p.id,
     quantity: p.quantity,
   }))
-})
+} as AppointmentForm)
 
 let selection = ref(0);
 function handleSelect(number: number){
   selection.value = number;
   console.log(selection);
 }
+
+function addProduct(product: any) {
+  const exists = products.value.find(p => p.id === product.id)
+
+  if (exists) {
+    exists.quantity += 1
+    return
+  }
+
+  products.value.push(product)
+}
+
+onMounted(async () => {
+  const res = await $fetch<{ data: any[] }>(`${baseUrl}/api/products`, {
+    credentials: 'include'
+  })
+
+  allProducts.value = res.data ?? []
+})
+
 </script>
 
 <template >
 
   <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
     
-    <div class="bg-white rounded-xl shadow-xl w-full max-w-lg min-h-[75%] p-6 space-y-4">
-      
-      <div class="flex flex-row justify-around pb-4">
+    <div class="bg-white rounded-xl shadow-xl w-full max-w-lg h-[90vh] flex flex-col p-4">
+      <div class="flex flex-row justify-around pb-4 border-b">
         <h2 class="cursor-pointer hover:underline" @click="handleSelect(0)">Időpont</h2>
         <h2 class="cursor-pointer hover:underline" @click="handleSelect(1)">Foglalhatóság</h2>
         <h2 class="cursor-pointer hover:underline" @click="handleSelect(2)">Egyéb elfoglaltság</h2>
+        <button @click="emit('close')" class="text-gray-400 hover:text-gray-600">✕</button>
       </div>
+      
 
-    <div id="appointment" v-if="selection=== 0">
+    
+      <div class="flex-1 overflow-y-auto pt-3">
+        <div id="appointment" v-if="selection=== 0">
         <div class="flex justify-between items-center">
         <h2 class="text-lg font-semibold mb-6">
           {{ isNew ? 'Időpont hozzáadása' : 'Időpont szerkesztés' }}
         </h2>
-        <button @click="emit('close')" class="text-gray-400 hover:text-gray-600">✕</button>
+       
       </div>
 
       <div class="space-y-4">
@@ -120,21 +168,33 @@ function handleSelect(number: number){
       </div>
       
       <!-- products -->
-      <h2 class="pt-2 text-md font-semibold my-3">Használt termékek</h2>
-      <div class="h-[15rem] flex flex-col gap-2 overflow-y-auto">
-        <AppointmentProductCard  
-          v-for="(product,i) in products"
-          :key="product.id"
-          :product="product"
-          :orderNum="i"
-          @update:quantity="products[i].quantity = $event"
-          @remove="products.splice(i, 1)"
-          class="mb-2"
-          
-        />
+      <div class="flex justify-between items-center">
+        <h2 class="pt-2 text-md font-semibold my-3">
+          Használt termékek
+        </h2>
+      
+        <button
+          @click="showProductModal = true"
+          class="text-sm px-3 py-1 bg-violet-600 text-white rounded-md"
+        >
+          + Hozzáadás
+        </button>
+      </div>
+
+      <div class="h-[20rem] flex flex-col gap-2 overflow-y-auto">
+        <div class="h-[20rem] flex flex-col gap-2 overflow-y-auto">
+          <AppointmentProductCard  
+            v-for="(product,i) in products"
+            :key="product.id"
+            :product="product"
+            :orderNum="i"
+            @update:quantity="products[i].quantity = $event"
+            @remove="products.splice(i, 1)"
+          />
+        </div>
 
       </div>
-      <div class="flex justify-between pt-5">
+      <div class="flex justify-between pt-10">
         <button v-if="!isNew"
           @click="emit('delete', appointment.id)"
           class="text-white text-sm bg-red-600 rounded-md px-3">
@@ -145,18 +205,22 @@ function handleSelect(number: number){
           {{ isNew ? 'Foglalás' : 'Mentés' }}
         </button>
       </div>
+        </div>
 
-    </div>
+        <div v-if="selection === 1" class="space-y-3">
+          <h2 class="text-lg font-semibold">Állitsd be mettől meddig lehet foglalni</h2>
+    
+          
+          <ScheduleModalSection />
+          
+        </div>
+
+        <div v-if="selection ===3"></div>
+    
+        </div>
+      </div>
       
-    <div v-if="selection === 1">
-      <h2 class="text-lg font-semibold">Állitsd be mettől meddig lehet foglalni</h2>
 
-      <ScheduleModalSection />
-      
-    </div>
-
-
-    </div>
   </div>
 
 
@@ -190,4 +254,10 @@ function handleSelect(number: number){
 
   </div>
 </div>
+<ProductPickerModal
+  v-model="showProductModal"
+  :products="allProducts"
+  @add="addProduct"
+/>
+
 </template>

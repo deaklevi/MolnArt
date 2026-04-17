@@ -16,7 +16,7 @@ use App\Http\Controllers\ScheduleController;
 Route::get('/auth/google/redirect', [GoogleController::class, 'redirectToGoogle']);
 Route::get('/auth/google/callback', [App\Http\Controllers\Auth\GoogleController::class, 'handleGoogleCallback']);
 
-Route::post('/login', [AuthController::class, 'login']);
+//Route::post('/login', [AuthController::class, 'login']);
 
 Route::post('/appointments', [AppointmentController::class, 'store']);
 
@@ -27,12 +27,12 @@ Route::apiResource('appointments', AppointmentController::class);
 Route::apiResource('services', ServiceController::class);
 Route::apiResource('reviews', ReviewController::class);
 Route::apiResource('customers', CustomerController::class);
-Route::apiResource('schedule',ScheduleController::class);
 Route::apiResource('products',ProductController::class);
 
 // Védett
 Route::middleware('auth:sanctum')->group(function () {
     
+    Route::apiResource('schedule',ScheduleController::class);
     Route::post('/user/update', [AuthController::class, 'updateProfile']);
 
     Route::post('/user/services/sync', [AuthController::class, 'syncServices']);
