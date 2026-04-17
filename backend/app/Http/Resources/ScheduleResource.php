@@ -16,9 +16,9 @@ class ScheduleResource extends JsonResource
     {
         return [
             'id'    => $this->id,
-            'day'   => $this->day,
-            'start' => $this->start,
-            'end'   => $this->end,
+            'date'   => $this->date->toDateString(),
+            'start' => substr($this->start,0,5),
+            'end'   => substr($this->end, 0, 5),
             'user' => new UserResource($this->whenLoaded('user'))
         ];
     }

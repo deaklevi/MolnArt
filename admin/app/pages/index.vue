@@ -28,7 +28,7 @@ const login = async () => {
     const csrfToken = getCsrfToken();
 
     // 3. Elküldjük a Login kérést, a fejlécbe beletéve a tokent!
-    await $fetch(`${apiBase}/api/login`, {
+    await $fetch(`${apiBase}/login`, {
       method: 'POST',
       body: form.value,
       credentials: 'include',
@@ -39,9 +39,13 @@ const login = async () => {
       }
     });
 
+    
     // Ha idáig eljut, a 419 eltűnt, és sikeres a belépés!
     navigateTo('/dashboard');
-    
+    let userlog = await $fetch('http://localhost:8000/api/user', {
+  credentials: 'include'
+})
+  console.log(userlog)
   } catch (error) {
     console.error("Hiba a belépésnél:", error);
     alert("Hibás felhasználónév vagy jelszó!");

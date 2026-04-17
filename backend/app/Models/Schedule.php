@@ -8,13 +8,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class Schedule extends Model
 {
     protected $fillable = [
-        'user_id','day','start','end'
+        'user_id','date','start','end'
     ];
 
-    // protected $casts = [
-    //     'start' => 'datetime',
-    //     'end'   => 'datetime',
-    // ];
+    protected $casts = [
+        'date' => 'date:Y-m-d'
+    ];
 
     public function user():BelongsTo{
         return $this->belongsTo(User::class);

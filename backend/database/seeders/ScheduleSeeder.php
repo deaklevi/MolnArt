@@ -14,21 +14,18 @@ class ScheduleSeeder extends Seeder
      */
     public function run(): void
     {
-         $users = User::all();
+        $users  = User::all();
+        $monday = now()->startOfWeek(1); // következő hét hétfőtől
 
         foreach ($users as $user) {
-
-            // Monday (1) to Friday (5)
-            for ($day = 1; $day <= 5; $day++) {
+            for ($i = 0; $i < 5; $i++) {
                 Schedule::create([
                     'user_id' => $user->id,
-                    'day'     => $day,
-                    'start'   => '08:00:00',
-                    'end'     => '17:00:00',
+                    'date'    => $monday->copy()->addDays($i)->toDateString(),
+                    'start'   => '08:00',
+                    'end'     => '17:00',
                 ]);
             }
-
-
         }
     }
 }

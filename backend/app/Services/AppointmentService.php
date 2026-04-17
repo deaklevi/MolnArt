@@ -1,7 +1,5 @@
 <?php
 
-// app/Services/AppointmentService.php
-
 namespace App\Services;
 
 use App\Http\Requests\StoreAppointmentRequest;
@@ -20,11 +18,11 @@ class AppointmentService
         return DB::transaction(function () use ($request) {
             $data = $request->validated();
 
-            // 1. Check for time conflict across ALL stylists
-            // (your schema has no user_id on appointment, so we check globally)
-            $conflict = Appointment::where('appointment_from', '<', $data['appointment_to'])
-                                   ->where('appointment_to', '>', $data['appointment_from'])
-                                   ->exists();
+            // 1. Check for time conflict (per user)
+            $conflict = Appointment::where('user_id', $data['user_id'])
+                ->where('appointment_from', '<', $data['appointment_to'])
+                ->where('appointment_to', '>', $data['appointment_from'])
+                ->exists();
 
             if ($conflict) {
                 throw new \InvalidArgumentException(
@@ -32,43 +30,42 @@ class AppointmentService
                 );
             }
 
-            // 2. Find or create customer by email
+            // 2. Find or create customer
             $customer = Customer::updateOrCreate(
                 ['email' => $data['email']],
                 [
                     'name'         => $data['name'],
                     'phone_number' => $data['phone_number'],
-                    'user_id'      => $data['worker_id'], 
+                    'user_id'      => $data['user_id'],
                 ]
             );
 
-            // 3. Create appointment
+            // 3. Create appointment ✅ FIXED (user_id added)
             $appointment = Appointment::create([
                 'appointment_from' => $data['appointment_from'],
                 'appointment_to'   => $data['appointment_to'],
                 'service'          => $data['service'],
                 'customer_id'      => $customer->id,
+                'user_id'          => $data['user_id'], // 🔥 THIS FIXES YOUR ERROR
             ]);
 
-            // 4. Attach products + deduct stock
-            foreach ($data['products'] ?? [] as $item) {
+            // 4. Attach products + deduct stock (NO quantity anymore)
+            foreach ($data['used_products'] ?? [] as $item) {
                 $product = Product::lockForUpdate()->findOrFail($item['product_id']);
-
+    
                 if ($product->stock < $item['quantity']) {
-                    throw new \RuntimeException(
-                        "Insufficient stock for: {$product->name}"
-                    );
+                    throw new \RuntimeException("Out of stock: {$product->name}");
                 }
-
+    
                 $appointment->products()->attach($product->id, [
                     'quantity' => $item['quantity'],
                 ]);
-
+    
                 $product->decrement('stock', $item['quantity']);
             }
 
-            // 5. Send confirmation email — failure won't roll back the booking
-            $worker = User::find($data['worker_id']);
+            // 5. Send email (safe)
+            $worker = User::find($data['user_id']);
 
             try {
                 Mail::to($customer->email)->send(new \App\Mail\AppointmentBooked([
