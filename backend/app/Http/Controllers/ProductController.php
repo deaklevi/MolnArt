@@ -41,8 +41,17 @@ class ProductController extends Controller
      */
     public function update(UpdateProductRequest $request, Product $product)
     {
-        $product->update($request->validated());
-        return new ProductResource($product);
+        if ($request->has('amount')) {
+        $product->stock += $request->input('amount');
+    }
+
+    // 2. A többi alapvető mező frissítése (név, típus stb.), ha küldtél olyat
+    // Csak azokat frissítjük, amik benne vannak a kérésben
+    $product->fill($request->only(['name', 'type', 'unit']));
+
+    $product->save();
+
+    return new ProductResource($product);
     }
 
     /**
