@@ -13,11 +13,12 @@ class ScheduleService
             ->get();
     }
 
-    public function isAvailable(int $userId, string $from, string $to): bool
+    public function isAvailable(int $userId, string $date, string $start, string $end): bool
     {
         return Schedule::where('user_id', $userId)
-            ->where('date', '<=', $from)
-            ->where('date', '>=', $to)
+            ->where('date', $date)
+            ->where('start', '<=', $start)
+            ->where('end', '>=', $end)
             ->exists();
     }
 
@@ -33,5 +34,10 @@ class ScheduleService
     {
         $schedule->update($data);
         return $schedule;
+    }
+
+    public function delete(Schedule $schedule): void
+    {
+        $schedule->delete();
     }
 }

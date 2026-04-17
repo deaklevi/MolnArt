@@ -36,7 +36,7 @@ class AppointmentController extends Controller
     public function store(StoreAppointmentRequest $request): AppointmentResource
     {
         $appointment = $this->service->book($request, Auth::id());
-    
+
         return new AppointmentResource($appointment);
     }   
 
@@ -44,6 +44,7 @@ class AppointmentController extends Controller
     {
         abort_if($appointment->user_id !== Auth::id(), 403);
 
+        // conflict check stays in controller — it's HTTP concern, not business logic
         $data = $request->validated();
 
         if (isset($data['appointment_from']) || isset($data['appointment_to'])) {
@@ -56,32 +57,12 @@ class AppointmentController extends Controller
                 ->where('appointment_to', '>', $from)
                 ->exists();
 
-            if ($conflict) {
-                abort(422, 'This time slot conflicts with another appointment.');
-            }
+            if ($conflict) abort(422, 'This time slot conflicts with another appointment.');
         }
 
-        $appointment->update(
-            $request->only(['service', 'appointment_from', 'appointment_to'])
+        return new AppointmentResource(
+            $this->service->update($request, $appointment)
         );
-
-        if ($appointment->customer) {
-            $appointment->customer->update(
-                $request->only(['name', 'email', 'phone_number'])
-            );
-        }
-    
-        if (isset($data['used_products'])) {
-            $syncData = collect($data['used_products'])
-                ->mapWithKeys(fn($item) => [
-                    $item['product_id'] => ['quantity' => $item['quantity']]
-                ])
-                ->toArray();
-    
-            $appointment->products()->sync($syncData);
-        }
-    
-        return new AppointmentResource($appointment->load('customer', 'products'));
     }
 
     public function destroy(Appointment $appointment): JsonResponse
@@ -89,9 +70,8 @@ class AppointmentController extends Controller
         abort_if($appointment->user_id !== Auth::id(), 403);
         DB::transaction(function () use ($appointment) {
             foreach ($appointment->products as $product) {
-                $product->increment('stock', $product->usage->quantity);
+                $product->increment('stock', $product->pivot->quantity);
             }
-
             $appointment->delete();
         });
 
