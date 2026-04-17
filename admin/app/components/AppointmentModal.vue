@@ -54,8 +54,6 @@ const form = reactive({
   name: props.appointment.customer?.name ?? '',
   email: props.appointment.customer?.email ?? '',
   phone_number: props.appointment.customer?.phone_number ?? '',
-  customer_id: props.appointment.customer?.id ?? null,
-  user_id: props.appointment.user_id ?? null,
 })
 
 const products = ref<any[]>(

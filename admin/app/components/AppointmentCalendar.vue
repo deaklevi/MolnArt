@@ -50,20 +50,15 @@ const checkView = () => {
   const currentView = api.view.type
   const targetView = isMobile.value ? 'timeGridDay' : 'timeGridWeek'
 
-  // Only change if needed — avoid unnecessary re-renders
   if (currentView !== targetView) {
     api.changeView(targetView)
   }
 }
 
-// ── HELPERS ───────────────────────────────────────────
-
-// convert backend → input
 function formatForInput(date: string) {
   return date?.slice(0, 16)
 }
 
-// convert input → backend
 function toBackendFormat(local: string) {
   return local.replace('T', ' ') + ':00'
 }
@@ -275,7 +270,6 @@ async function patchAppointmentTime(
   }
 }
 
-// SAVE (CREATE / UPDATE)
 async function handleSave(formData: AppointmentForm) {
   const url = isNewBooking.value
     ? `${baseUrl}/api/appointments`
