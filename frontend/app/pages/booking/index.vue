@@ -99,7 +99,7 @@
         </div>
       </div>
     </div>
-
+    
     <div v-if="cart.length > 0" class="lg:hidden fixed bottom-0 left-0 right-0 bg-white shadow-[0_-10px_25px_rgba(0,0,0,0.1)] z-50 rounded-t-[2rem] border-t border-purple-100 p-5 animate-in slide-in-from-bottom duration-300">
       <div class="flex items-center justify-between mb-4">
         <div>
@@ -116,7 +116,7 @@
           <button @click="cart.splice(index, 1)" class="text-red-400 text-xs">✕</button>
         </div>
       </div>
-    </div>
+    </div> 
 
     <CalendarModal 
       :is-open="isCalendarOpen"

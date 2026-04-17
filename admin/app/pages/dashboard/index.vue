@@ -138,6 +138,18 @@ const logout = async () => {
             <p class="text-slate-500 text-sm leading-relaxed">Ügyfélkört érintő statisztikák és elérhetőségek listája.</p>
           </NuxtLink>
 
+          
+
+          <NuxtLink to="/dashboard/stock" class="group bg-white p-8 rounded-3xl border border-slate-200 shadow-sm hover:shadow-xl hover:border-fuchsia-300 transition-all duration-300 text-left">
+            <div class="w-14 h-14 bg-fuchsia-100 text-fuchsia-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="w-7 h-7">
+                <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="M3.3 7l8.7 5 8.7-5"/><path d="M12 22V12"/>
+              </svg>
+            </div>
+            <h3 class="text-xl font-bold text-slate-800 mb-2">Raktár</h3>
+            <p class="text-slate-500 text-sm leading-relaxed">Raktár készlet kezelése és szerkesztése.</p>
+          </NuxtLink>
+
         </div>
       </main>
     </div>

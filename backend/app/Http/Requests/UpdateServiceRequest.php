@@ -23,8 +23,8 @@ class UpdateServiceRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['required','string','max:50'],
-            'time' => ['required','integer','min:1']
+            'name' => ['sometimes','string','max:50'],
+            'time' => ['sometimes','integer','min:1']
         ];
     }
 }

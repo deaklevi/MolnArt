@@ -17,7 +17,8 @@ return new class extends Migration
             $table->dateTime('appointment_to');
             $table->string('service');
             $table->foreignId('customer_id')->constrained()->cascadeOnDelete();
-            $table->timestamps();
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            $table->timestamps(); 
         });
     }
 

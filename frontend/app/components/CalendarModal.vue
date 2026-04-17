@@ -32,7 +32,7 @@
                <span class="text-xs text-stone-400">{{ pendingService?.time }} perc</span>
              </div>
           </div>
-        </div>
+        </div> 
 
         <div class="p-12 w-7/12 flex flex-col bg-white overflow-hidden">
           <h2 class="text-3xl font-serif mb-2 text-gray-950">Szabad időpontok</h2>

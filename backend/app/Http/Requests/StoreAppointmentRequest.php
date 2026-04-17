@@ -12,7 +12,7 @@ class StoreAppointmentRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -26,7 +26,14 @@ class StoreAppointmentRequest extends FormRequest
             'appointment_from' => ['required', 'date'],
             'appointment_to' => ['required', 'date', 'after:appointment_from'],
             'service' => ['required', 'string', 'max:25'],
-            'customer_id' => ['required', 'exists:customers,id'],
+            'customer_id' => ['nullable', 'exists:customers,id'],
+            'user_id' => ['nullable', 'exists:users,id'],
+            'name' => ['sometimes', 'string', 'max:100'],
+            'email' => ['required', 'email', 'max:100'],
+            'phone_number' => ['sometimes', 'string', 'max:20'],
+            'used_products' => ['sometimes', 'array'],
+            'used_products.*.product_id' => ['required_with:used_products', 'exists:products,id'],
+            'used_products.*.quantity' => ['required_with:used_products', 'numeric', 'min:0'],
         ];
     }
 }
