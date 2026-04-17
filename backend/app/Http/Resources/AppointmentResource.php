@@ -25,7 +25,7 @@ class AppointmentResource extends JsonResource
             'id' => $p->id,
             'name' => $p->name,
             'unit' => $p->unit,
-            'quantity' => $p->usage->quantity,
+            'quantity' => $p->pivot->quantity,
           ]))
         ];
     }

@@ -31,7 +31,7 @@ class Appointment extends Model
     }
 
     public function products():BelongsToMany{
-        return $this->belongsToMany(Product::class,'appointment_product')->using(AppointmentProduct::class)->withPivot('quantity')->as('usage');
+        return $this->belongsToMany(Product::class,'appointment_product')->using(AppointmentProduct::class)->withPivot('quantity');
     }
 
     public function user():BelongsTo{
