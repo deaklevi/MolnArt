@@ -92,12 +92,61 @@ function addProduct(product: any) {
 }
 
 onMounted(async () => {
+  fetchBreaks();
   const res = await $fetch<{ data: any[] }>(`${baseUrl}/api/products`, {
     credentials: 'include'
   })
 
   allProducts.value = res.data ?? []
 })
+
+const breakForm = ref({
+  date: '',
+  start: '',
+  end: ''
+})
+
+
+
+//breaks
+const breaks = ref<any[]>([])
+
+async function fetchBreaks() {
+    const res = await $fetch<{ data: any[] }>(`${baseUrl}/api/unavailabilities`, {
+    credentials: 'include'
+  })
+
+  breaks.value = res.data ?? []
+}
+
+async function createBreak() {
+  if (!breakForm.value.date || !breakForm.value.start || !breakForm.value.end) return
+
+  await $fetch(`${baseUrl}/api/unavailabilities`, {
+    method: 'POST',
+    credentials: 'include',
+    body: {
+      date: breakForm.value.date,
+      start: breakForm.value.start,
+      end: breakForm.value.end
+    }
+  })
+
+  breakForm.value.start = ''
+  breakForm.value.end = ''
+
+  await fetchBreaks()
+}
+
+async function deleteBreak(id: number) {
+  await $fetch(`${baseUrl}/api/unavailabilities/${id}`, {
+    method: 'DELETE',
+    credentials: 'include'
+  })
+
+  await fetchBreaks()
+}
+
 
 </script>
 
@@ -215,7 +264,70 @@ onMounted(async () => {
           
         </div>
 
-        <div v-if="selection ===3"></div>
+        <div v-if="selection === 2" class="space-y-4">
+
+  <h2 class="text-lg font-semibold">
+    Egyéb elfoglaltság (szünetek / blokkolt idő)
+  </h2>
+
+  <!-- CREATE BLOCK -->
+  <div class="p-3 border rounded-lg space-y-2">
+
+    <input
+      v-model="breakForm.date"
+      type="date"
+      class="w-full border rounded p-2"
+    />
+
+    <div class="grid grid-cols-2 gap-2">
+      <input
+        v-model="breakForm.start"
+        type="time"
+        class="border rounded p-2"
+      />
+      <input
+        v-model="breakForm.end"
+        type="time"
+        class="border rounded p-2"
+      />
+    </div>
+
+    <button
+      @click="createBreak"
+      class="w-full bg-red-600 text-white py-2 rounded"
+    >
+      + Elfoglaltság hozzáadása
+    </button>
+  </div>
+
+  <!-- LIST -->
+  <div class="space-y-2">
+
+    <div
+      v-for="b in breaks"
+      :key="b.id"
+      class="flex justify-between items-center border rounded p-2"
+    >
+
+      <div>
+        <p class="text-sm font-medium">{{ b.date }}</p>
+        <p class="text-xs text-gray-500">
+          {{ b.start }} - {{ b.end }}
+        </p>
+      </div>
+
+      <button
+        @click="deleteBreak(b.id)"
+        class="text-red-500 text-sm"
+      >
+        törlés
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
     
         </div>
       </div>

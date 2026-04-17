@@ -1,48 +1,60 @@
 <?php
-
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreScheduleRequest;
 use App\Http\Requests\UpdateScheduleRequest;
 use App\Http\Resources\ScheduleResource;
 use App\Models\Schedule;
-use Illuminate\Http\Request;
 use App\Services\ScheduleService;
 use Illuminate\Support\Facades\Auth;
+
 class ScheduleController extends Controller
 {
+    public function __construct(
+        private ScheduleService $service
+    ) {}
 
-    public function index(Request $request, ScheduleService $service)
+    public function index()
     {
         return ScheduleResource::collection(
-            $service->getUserSchedule($request->user()->id)
+            $this->service->getUserSchedule(Auth::id())
         );
     }
 
-    public function store(StoreScheduleRequest $request, ScheduleService $service): ScheduleResource
+    public function store(StoreScheduleRequest $request): ScheduleResource
     {
         $this->authorize('create', Schedule::class);
-        $schedule = $service->create(Auth::id(), $request->validated());
+
+        $schedule = $this->service->create(
+            Auth::id(),
+            $request->validated()
+        );
 
         return new ScheduleResource($schedule);
     }
 
     public function show(Schedule $schedule): ScheduleResource
     {
+        $this->authorize('view', $schedule);
+
         return new ScheduleResource($schedule->load('user'));
     }
 
-    public function update(UpdateScheduleRequest $request, Schedule $schedule, ScheduleService $service)
+    public function update(UpdateScheduleRequest $request, Schedule $schedule): ScheduleResource
     {
         $this->authorize('update', $schedule);
-        $schedule = $service->update($schedule, $request->validated());
+
+        $schedule = $this->service->update($schedule, $request->validated());
+
         return new ScheduleResource($schedule);
     }
 
     public function destroy(Schedule $schedule)
     {
         $this->authorize('delete', $schedule);
-        $schedule->delete();
+
+        $this->service->delete($schedule);
+
         return response()->noContent();
     }
 }

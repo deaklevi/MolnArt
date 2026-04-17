@@ -6,40 +6,48 @@ use App\Http\Requests\UpdateUnavailabilityRequest;
 use App\Http\Resources\UnavailabilityResource;
 use App\Models\Unavailability;
 use App\Services\UnavailabilityService;
-use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class UnavailabilityController extends Controller
 {
-    public function index(Request $request, UnavailabilityService $service)
+    public function __construct(
+        private UnavailabilityService $service
+    ) {}
+
+    public function index()
     {
         return UnavailabilityResource::collection(
-            $service->getUserUnavailability($request->user()->id)
+            $this->service->getUserUnavailability(Auth::id())
         );
     }
 
-    public function store(StoreUnavailabilityRequest $request, UnavailabilityService $service)
+    public function store(StoreUnavailabilityRequest $request)
     {
-        $data = $request->validated();
-
-        $unavailability = $service->create($request->user(), $data);
+        $unavailability = $this->service->create(
+            Auth::user(),
+            $request->validated()
+        );
 
         return new UnavailabilityResource($unavailability);
     }
 
-    public function update(UpdateUnavailabilityRequest $request, Unavailability $unavailability, UnavailabilityService $service)
+    public function update(UpdateUnavailabilityRequest $request, Unavailability $unavailability)
     {
-        $this->authorize('update', $unavailability);
+        abort_if($unavailability->user_id !== Auth::id(), 403);
 
-        $unavailability = $service->update($unavailability, $request->validated());
+        $unavailability = $this->service->update(
+            $unavailability,
+            $request->validated()
+        );
 
         return new UnavailabilityResource($unavailability);
     }
 
-    public function destroy(Unavailability $unavailability, UnavailabilityService $service)
+    public function destroy(Unavailability $unavailability)
     {
-        $this->authorize('delete', $unavailability);
+        abort_if($unavailability->user_id !== Auth::id(), 403);
 
-        $service->delete($unavailability);
+        $this->service->delete($unavailability);
 
         return response()->noContent();
     }
