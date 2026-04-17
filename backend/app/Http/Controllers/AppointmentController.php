@@ -21,8 +21,8 @@ class AppointmentController extends Controller
 
     public function index()
     {
-        $appointments = Appointment::with('customer', 'products')->get();
-        return AppointmentResource::collection($appointments);  
+        $appointments = Appointment::with('customer','products')->where('user_id', Auth::id())->get();
+        return AppointmentResource::collection($appointments);
     }
 
     public function show(Appointment $appointment): AppointmentResource
@@ -42,46 +42,46 @@ class AppointmentController extends Controller
 
     public function update(UpdateAppointmentRequest $request, Appointment $appointment): AppointmentResource
     {
-    abort_if($appointment->user_id !== Auth::id(), 403);
+        abort_if($appointment->user_id !== Auth::id(), 403);
 
-    $data = $request->validated();
+        $data = $request->validated();
 
-    if (isset($data['appointment_from']) || isset($data['appointment_to'])) {
-        $from = $data['appointment_from'] ?? $appointment->appointment_from;
-        $to   = $data['appointment_to']   ?? $appointment->appointment_to;
+        if (isset($data['appointment_from']) || isset($data['appointment_to'])) {
+            $from = $data['appointment_from'] ?? $appointment->appointment_from;
+            $to   = $data['appointment_to']   ?? $appointment->appointment_to;
 
-        $conflict = Appointment::where('id', '!=', $appointment->id)
-            ->where('user_id', Auth::id())
-            ->where('appointment_from', '<', $to)
-            ->where('appointment_to', '>', $from)
-            ->exists();
+            $conflict = Appointment::where('id', '!=', $appointment->id)
+                ->where('user_id', Auth::id())
+                ->where('appointment_from', '<', $to)
+                ->where('appointment_to', '>', $from)
+                ->exists();
 
-        if ($conflict) {
-            abort(422, 'This time slot conflicts with another appointment.');
+            if ($conflict) {
+                abort(422, 'This time slot conflicts with another appointment.');
+            }
         }
-    }
 
-    $appointment->update(
-        $request->only(['service', 'appointment_from', 'appointment_to'])
-    );
-
-    if ($appointment->customer) {
-        $appointment->customer->update(
-            $request->only(['name', 'email', 'phone_number'])
+        $appointment->update(
+            $request->only(['service', 'appointment_from', 'appointment_to'])
         );
-    }
 
-    if (isset($data['used_products'])) {
-        $syncData = collect($data['used_products'])
-            ->mapWithKeys(fn($item) => [
-                $item['product_id'] => ['quantity' => $item['quantity']]
-            ])
-            ->toArray();
-
-        $appointment->products()->sync($syncData);
-    }
-
-    return new AppointmentResource($appointment->load('customer', 'products'));
+        if ($appointment->customer) {
+            $appointment->customer->update(
+                $request->only(['name', 'email', 'phone_number'])
+            );
+        }
+    
+        if (isset($data['used_products'])) {
+            $syncData = collect($data['used_products'])
+                ->mapWithKeys(fn($item) => [
+                    $item['product_id'] => ['quantity' => $item['quantity']]
+                ])
+                ->toArray();
+    
+            $appointment->products()->sync($syncData);
+        }
+    
+        return new AppointmentResource($appointment->load('customer', 'products'));
     }
 
     public function destroy(Appointment $appointment): JsonResponse
