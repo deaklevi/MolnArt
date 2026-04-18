@@ -122,7 +122,7 @@
       :is-open="isCalendarOpen"
       :pending-service="pendingService"
       :worker-name="selectedWorker?.user_name"
-      :existing-appointments="existingApps"
+      :worker-id="selectedWorker?.id"
       @close="isCalendarOpen = false"
       @confirm="handleAddToCart" 
     />
@@ -135,24 +135,24 @@ import { useRoute, useRouter } from 'vue-router';
 
 const config = useRuntimeConfig();
 const router = useRouter();
-const route = useRoute();
+const route  = useRoute();
 
-const cart = ref([]);
+const cart           = ref([]);
 const isCalendarOpen = ref(false);
 const pendingService = ref(null);
-const existingApps = ref([]); 
 const selectedWorker = ref(null);
 
 const totalSum = computed(() => cart.value.reduce((total, i) => total + Number(i.price || 0), 0));
 
 const handleAddToCart = (bookingData) => {
   cart.value.push({
-    id: Date.now(),
-    name: bookingData.name,
-    price: bookingData.price,
-    time: bookingData.time,
+    id:        Date.now(),
+    name:      bookingData.name,
+    price:     bookingData.price,
+    time:      bookingData.time,
     startTime: bookingData.startTime,
-    worker: selectedWorker.value.user_name
+    endTime:   bookingData.endTime,
+    worker:    selectedWorker.value.user_name,
   });
   isCalendarOpen.value = false;
 };
@@ -163,17 +163,17 @@ const openCalendarFor = (service) => {
 };
 
 const handleFinalConfirm = async () => {
-  alert("Foglalás sikeresen elküldve!");
+  alert('Foglalás sikeresen elküldve!');
   cart.value = [];
 };
 
-const { data: publicUsers } = await useAsyncData('users', () => 
+const { data: publicUsers } = await useAsyncData('users', () =>
   $fetch(`${config.public.apiBase}/api/user_public_data`)
 );
 
 const schedule = {
   'Hétfő': '08:00 - 19:00', 'Kedd': '08:00 - 19:00', 'Szerda': '08:00 - 19:00',
-  'Csütörtök': '08:00 - 19:00', 'Péntek': '08:00 - 19:00', 'Szombat': 'Zárva', 'Vasárnap': 'Zárva'
+  'Csütörtök': '08:00 - 19:00', 'Péntek': '08:00 - 19:00', 'Szombat': 'Zárva', 'Vasárnap': 'Zárva',
 };
 
 const syncWorkerFromUrl = () => {
