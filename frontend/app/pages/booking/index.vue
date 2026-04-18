@@ -1,20 +1,23 @@
 <template>
   <div class="reservation-page bg-stone-50 min-h-screen pb-24 md:pb-12">
     
-    <section class="bg-white border-b border-stone-200 shadow-sm sticky top-0 z-30">
+    <!-- STICKY HEADER — added overflow-visible so the ring is never clipped -->
+    <section class="bg-white border-b border-stone-200 shadow-sm top-0 z-30">
       <div class="container mx-auto px-4 py-4 md:py-6">
         <h1 class="text-center text-sm md:text-2xl font-serif tracking-widest text-gray-900 uppercase mb-4 md:mb-6">
           Válassz szakembert
         </h1>
-        <div class="flex justify-center gap-4 md:gap-12 overflow-x-auto pb-2 no-scrollbar">
+        <!-- py-3 gives breathing room above/below so the ring isn't clipped by the section edge -->
+        <div class="flex justify-center gap-4 md:gap-12 overflow-x-auto pb-2 pt-3 no-scrollbar">
           <div v-for="worker in publicUsers?.data" 
                :key="worker.id" 
                @click="selectWorker(worker)" 
                class="flex flex-col items-center cursor-pointer group flex-shrink-0">
-            <div class="relative rounded-full p-1 transition-all duration-500" 
-                 :class="selectedWorker?.id === worker.id ? 'ring-4 ring-purple-900/30' : 'hover:ring-2 hover:ring-stone-200'">
+            <!-- Extra padding around the ring container so it never clips -->
+            <div class="relative rounded-full p-1.5 transition-all duration-500" 
+                 :class="selectedWorker?.id === worker.id ? 'ring-4 ring-purple-900/30 ring-offset-2' : 'hover:ring-2 hover:ring-stone-200 hover:ring-offset-1'">
               <img :src="`${config.public.apiBase}${worker.profile_image}`" 
-                   class="w-12 h-12 md:w-24 md:h-24 rounded-full object-cover shadow-md" 
+                   class="w-12 h-12 md:w-24 md:h-24 rounded-full object-cover shadow-md transition-all duration-300" 
                    :class="selectedWorker?.id === worker.id ? 'scale-100' : 'grayscale-[40%]'" />
             </div>
             <span class="mt-2 text-[9px] md:text-sm font-bold uppercase tracking-tight" 
@@ -28,6 +31,7 @@
 
     <div class="container mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-12 gap-10 max-w-7xl">
       
+      <!-- SERVICES LIST -->
       <div class="lg:col-span-8">
         <div class="flex items-center justify-between mb-8 border-b border-stone-200 pb-4">
           <h2 class="text-lg md:text-2xl font-serif tracking-wide text-gray-900 uppercase">
@@ -63,43 +67,56 @@
           </div>
         </div>
       </div>
+      
+      <div class="lg:col-span-4">
+        <div class="lg:sticky lg:top-5 lg:max-h-[calc(100vh-104px)] space-y-6 pr-1 custom-scrollbar">
 
-      <div class="lg:col-span-4 space-y-6">
-        
-        <div v-if="cart.length > 0" class="hidden lg:block bg-white rounded-3xl p-6 shadow-xl border border-purple-100 sticky top-40 z-20 transition-all">
-          <h3 class="text-xs font-black text-purple-900 uppercase tracking-[0.2em] mb-6 border-b border-stone-100 pb-2">Kiválasztott időpontok</h3>
-          <div class="space-y-4 mb-8 max-h-60 overflow-y-auto pr-2">
-            <div v-for="(item, index) in cart" :key="item.id" class="flex justify-between items-start bg-stone-50 p-4 rounded-2xl border border-stone-100">
-              <div>
-                <p class="font-bold text-sm text-gray-900">{{ item.name }}</p>
-                <p class="text-[10px] text-purple-700 font-bold uppercase mt-1">{{ item.startTime }}</p>
+          <!-- CART (desktop) -->
+          <div v-if="cart.length > 0" class="hidden lg:block bg-white rounded-3xl p-6 shadow-xl border border-purple-100 transition-all">
+            <h3 class="text-xs font-black text-purple-900 uppercase tracking-[0.2em] mb-6 border-b border-stone-100 pb-2">Kiválasztott időpontok</h3>
+            <!-- max-h removed here — the outer container handles scrolling -->
+            <div class="space-y-4 mb-8 max-h-[240px] overflow-y-auto">
+              <div v-for="(item, index) in cart" :key="item.id" class="flex justify-between items-start bg-stone-50 p-4 rounded-2xl border border-stone-100">
+                <div>
+                  <p class="font-bold text-sm text-gray-900">{{ item.name }}</p>
+                  <p class="text-[10px] text-purple-700 font-bold uppercase mt-1">{{ item.startTime }}</p>
+                </div>
+                <button @click="cart.splice(index, 1)" class="text-stone-300 hover:text-red-500">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                </button>
               </div>
-              <button @click="cart.splice(index, 1)" class="text-stone-300 hover:text-red-500"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>
+            </div>
+            <div class="pt-4 border-t border-stone-100">
+              <div class="flex justify-between items-end mb-6">
+                <p class="text-2xl font-serif text-purple-900">{{ totalSum }} Ft</p>
+              </div>
+              <button @click="handleFinalConfirm" class="w-full bg-purple-900 text-white py-4 rounded-2xl font-black uppercase tracking-widest hover:bg-stone-900 transition-all">
+                Foglalás beküldése
+              </button>
             </div>
           </div>
-          <div class="pt-4 border-t border-stone-100">
-            <div class="flex justify-between items-end mb-6">
-              <p class="text-2xl font-serif text-purple-900">{{ totalSum }} Ft</p>
-            </div>
-            <button @click="handleFinalConfirm" class="w-full bg-purple-900 text-white py-4 rounded-2xl font-black uppercase tracking-widest hover:bg-stone-900 transition-all">Foglalás beküldése</button>
-          </div>
-        </div>
 
-        <div v-if="selectedWorker" class="bg-white p-6 md:p-8 rounded-3xl shadow-sm border border-stone-100">
-          <h3 class="text-xs font-black text-purple-900 uppercase tracking-widest mb-4">Bemutatkozás</h3>
-          <h2 class="text-xl font-serif text-gray-950 mb-3">{{ selectedWorker.user_name }}</h2>
-          <p class="text-stone-600 italic text-xs leading-relaxed mb-6">"{{ selectedWorker.description || 'Várlak szeretettel!' }}"</p>
-          <h3 class="text-xs font-black text-purple-900 uppercase tracking-widest mb-4 border-t pt-4">Nyitvatartás</h3>
-          <div class="space-y-2">
-            <div v-for="(hours, day) in schedule" :key="day" class="flex justify-between text-xs">
-              <span class="text-stone-500">{{ day }}</span>
-              <span :class="hours === 'Zárva' ? 'text-red-400' : 'text-gray-900'">{{ hours }}</span>
+          <!-- WORKER INFO + OPENING HOURS -->
+          <div v-if="selectedWorker" class="bg-white p-6 md:p-8 rounded-3xl shadow-sm border border-stone-100">
+            <h3 class="text-xs font-black text-purple-900 uppercase tracking-widest mb-4">Bemutatkozás</h3>
+            <h2 class="text-xl font-serif text-gray-950 mb-3">{{ selectedWorker.user_name }}</h2>
+            <p class="text-stone-600 italic text-xs leading-relaxed mb-6">"{{ selectedWorker.description || 'Várlak szeretettel!' }}"</p>
+            <h3 class="text-xs font-black text-purple-900 uppercase tracking-widest mb-4 border-t pt-4">Nyitvatartás</h3>
+            <div class="space-y-2">
+              <div v-for="(hours, day) in schedule" :key="day" class="flex justify-between text-xs">
+                <span class="text-stone-500">{{ day }}</span>
+                <span :class="hours === 'Zárva' ? 'text-red-400' : 'text-gray-900'">{{ hours }}</span>
+              </div>
             </div>
           </div>
+
         </div>
       </div>
     </div>
     
+    <!-- MOBILE CART BAR -->
     <div v-if="cart.length > 0" class="lg:hidden fixed bottom-0 left-0 right-0 bg-white shadow-[0_-10px_25px_rgba(0,0,0,0.1)] z-50 rounded-t-[2rem] border-t border-purple-100 p-5 animate-in slide-in-from-bottom duration-300">
       <div class="flex items-center justify-between mb-4">
         <div>
@@ -199,4 +216,8 @@ const selectWorker = (worker) => {
 <style scoped>
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+.custom-scrollbar::-webkit-scrollbar { width: 4px; }
+.custom-scrollbar::-webkit-scrollbar-thumb { background: #e5e7eb; border-radius: 10px; }
+.custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
 </style>
