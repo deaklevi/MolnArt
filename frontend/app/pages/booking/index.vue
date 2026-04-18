@@ -1,19 +1,15 @@
 <template>
   <div class="reservation-page bg-stone-50 min-h-screen pb-24 md:pb-12">
-    
-    <!-- STICKY HEADER — added overflow-visible so the ring is never clipped -->
     <section class="bg-white border-b border-stone-200 shadow-sm top-0 z-30">
       <div class="container mx-auto px-4 py-4 md:py-6">
         <h1 class="text-center text-sm md:text-2xl font-serif tracking-widest text-gray-900 uppercase mb-4 md:mb-6">
           Válassz szakembert
         </h1>
-        <!-- py-3 gives breathing room above/below so the ring isn't clipped by the section edge -->
         <div class="flex justify-center gap-4 md:gap-12 overflow-x-auto pb-2 pt-3 no-scrollbar">
           <div v-for="worker in publicUsers?.data" 
                :key="worker.id" 
                @click="selectWorker(worker)" 
                class="flex flex-col items-center cursor-pointer group flex-shrink-0">
-            <!-- Extra padding around the ring container so it never clips -->
             <div class="relative rounded-full p-1.5 transition-all duration-500" 
                  :class="selectedWorker?.id === worker.id ? 'ring-4 ring-purple-900/30 ring-offset-2' : 'hover:ring-2 hover:ring-stone-200 hover:ring-offset-1'">
               <img :src="`${config.public.apiBase}${worker.profile_image}`" 
@@ -30,8 +26,6 @@
     </section>
 
     <div class="container mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-12 gap-10 max-w-7xl">
-      
-      <!-- SERVICES LIST -->
       <div class="lg:col-span-8">
         <div class="flex items-center justify-between mb-8 border-b border-stone-200 pb-4">
           <h2 class="text-lg md:text-2xl font-serif tracking-wide text-gray-900 uppercase">
@@ -71,10 +65,8 @@
       <div class="lg:col-span-4">
         <div class="lg:sticky lg:top-5 lg:max-h-[calc(100vh-104px)] space-y-6 pr-1 custom-scrollbar">
 
-          <!-- CART (desktop) -->
           <div v-if="cart.length > 0" class="hidden lg:block bg-white rounded-3xl p-6 shadow-xl border border-purple-100 transition-all">
             <h3 class="text-xs font-black text-purple-900 uppercase tracking-[0.2em] mb-6 border-b border-stone-100 pb-2">Kiválasztott időpontok</h3>
-            <!-- max-h removed here — the outer container handles scrolling -->
             <div class="space-y-4 mb-8 max-h-[240px] overflow-y-auto">
               <div v-for="(item, index) in cart" :key="item.id" class="flex justify-between items-start bg-stone-50 p-4 rounded-2xl border border-stone-100">
                 <div>
@@ -98,7 +90,6 @@
             </div>
           </div>
 
-          <!-- WORKER INFO + OPENING HOURS -->
           <div v-if="selectedWorker" class="bg-white p-6 md:p-8 rounded-3xl shadow-sm border border-stone-100">
             <h3 class="text-xs font-black text-purple-900 uppercase tracking-widest mb-4">Bemutatkozás</h3>
             <h2 class="text-xl font-serif text-gray-950 mb-3">{{ selectedWorker.user_name }}</h2>
@@ -116,7 +107,6 @@
       </div>
     </div>
     
-    <!-- MOBILE CART BAR -->
     <div v-if="cart.length > 0" class="lg:hidden fixed bottom-0 left-0 right-0 bg-white shadow-[0_-10px_25px_rgba(0,0,0,0.1)] z-50 rounded-t-[2rem] border-t border-purple-100 p-5 animate-in slide-in-from-bottom duration-300">
       <div class="flex items-center justify-between mb-4">
         <div>
@@ -154,7 +144,7 @@ const config = useRuntimeConfig();
 const router = useRouter();
 const route  = useRoute();
 
-const cart           = ref([]);
+const cart = ref([]);
 const isCalendarOpen = ref(false);
 const pendingService = ref(null);
 const selectedWorker = ref(null);
@@ -163,13 +153,13 @@ const totalSum = computed(() => cart.value.reduce((total, i) => total + Number(i
 
 const handleAddToCart = (bookingData) => {
   cart.value.push({
-    id:        Date.now(),
-    name:      bookingData.name,
-    price:     bookingData.price,
-    time:      bookingData.time,
+    id: Date.now(),
+    name: bookingData.name,
+    price: bookingData.price,
+    time: bookingData.time,
     startTime: bookingData.startTime,
-    endTime:   bookingData.endTime,
-    worker:    selectedWorker.value.user_name,
+    endTime: bookingData.endTime,
+    worker: selectedWorker.value.user_name,
   });
   isCalendarOpen.value = false;
 };
