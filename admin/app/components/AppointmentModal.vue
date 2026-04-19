@@ -6,23 +6,50 @@ const props = defineProps<{
   services: { id: number; name: string }[]
 }>()
 
-const showProductModal = ref(false)
-const allProducts = ref<any[]>([])
-
 const config = useRuntimeConfig()
 const baseUrl = config.public.apiBase
+const showProductModal = ref(false)
+const allProducts = ref<any[]>([])
+const customers = ref<any[]>([])
+const selectedCustomerId = ref<number | null>(
+  props.appointment.customer?.id ?? null
+)
+const showCustomerDropdown = ref(false)
+
+const filteredCustomers = computed(() => {
+  const q = form.name.trim().toLowerCase()
+  if (!q) return []
+  return customers.value.filter(
+    c => c.name.toLowerCase().includes(q) || c.email.toLowerCase().includes(q)
+  )
+})
+function onNameInput(){
+  selectedCustomerId.value = null  
+  showCustomerDropdown.value = true
+}
+
+function selectCustomer(customer: any) {
+  form.name         = customer.name
+  form.email        = customer.email
+  form.phone_number = customer.phone_number
+  selectedCustomerId.value    = customer.id
+  showCustomerDropdown.value  = false
+}
+
+function onNameBlur() {
+  setTimeout(() => { showCustomerDropdown.value = false }, 150)
+}
 
 
 type AppointmentForm = {
   appointment_from: string
   appointment_to: string
   service?: string
-  customer_id?: number | null
-  user_id?: number | null
   email?: string
   name?: string
   phone_number?: string
   used_products?: any[]
+  customer_id?: number | null
 }
 
 const emit = defineEmits<{
@@ -54,8 +81,6 @@ const form = reactive({
   name: props.appointment.customer?.name ?? '',
   email: props.appointment.customer?.email ?? '',
   phone_number: props.appointment.customer?.phone_number ?? '',
-  customer_id: props.appointment.customer?.id ?? null,
-  user_id: props.appointment.user_id ?? null,
 })
 
 const products = ref<any[]>(
@@ -68,6 +93,7 @@ const products = ref<any[]>(
 
 const submit = () => emit('save', {
   ...form,
+  customer_id: selectedCustomerId.value,
   used_products: products.value.map((p:any)=>({
     product_id: p.id,
     quantity: p.quantity,
@@ -93,11 +119,14 @@ function addProduct(product: any) {
 
 onMounted(async () => {
   fetchBreaks();
-  const res = await $fetch<{ data: any[] }>(`${baseUrl}/api/products`, {
-    credentials: 'include'
-  })
+  const [productsRes, customersRes] = await Promise.all([
+    $fetch<{ data: any[] }>(`${baseUrl}/api/products`,  { credentials: 'include' }),
+    $fetch<{ data: any[] }>(`${baseUrl}/api/customers`, { credentials: 'include' }),
+  ])
 
-  allProducts.value = res.data ?? []
+  allProducts.value = productsRes.data  ?? []
+  customers.value   = customersRes.data ?? []
+  
 })
 
 const breakForm = ref({
@@ -105,8 +134,6 @@ const breakForm = ref({
   start: '',
   end: ''
 })
-
-
 
 //breaks
 const breaks = ref<any[]>([])
@@ -161,9 +188,6 @@ async function deleteBreak(id: number) {
         <h2 class="cursor-pointer hover:underline" @click="handleSelect(2)">Egyéb elfoglaltság</h2>
         <button @click="emit('close')" class="text-gray-400 hover:text-gray-600">✕</button>
       </div>
-      
-
-    
       <div class="flex-1 overflow-y-auto pt-3">
         <div id="appointment" v-if="selection=== 0">
         <div class="flex justify-between items-center">
@@ -175,8 +199,37 @@ async function deleteBreak(id: number) {
 
       <div class="space-y-4">
         <div class="grid grid-cols-2 gap-3">
-          <input v-model="form.name" placeholder="Customer name"
-          class="w-full border rounded-lg px-3 py-2 text-sm" />
+          <div class="relative" @blur.capture="onNameBlur">
+           <input
+             v-model="form.name"
+             placeholder="Customer name"
+             class="w-full border rounded-lg px-3 py-2 text-sm"
+             :class="selectedCustomerId ? 'border-violet-400 bg-violet-50' : ''"
+             autocomplete="off"
+             @input="onNameInput"
+             @focus="showCustomerDropdown = true"
+           />
+          <span
+            v-if="selectedCustomerId"
+            class="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-violet-500 font-medium pointer-events-none"
+          >
+            ✓ meglévő ügyfél
+          </span>
+            <ul
+              v-if="showCustomerDropdown && filteredCustomers.length"
+              class="absolute z-10 w-full bg-white border rounded-lg shadow-lg mt-1 max-h-48 overflow-y-auto"
+            >
+              <li
+                v-for="customer in filteredCustomers"
+                :key="customer.id"
+                @mousedown.prevent="selectCustomer(customer)"
+                class="px-3 py-2 cursor-pointer hover:bg-violet-50 text-sm"
+              >
+                <span class="font-medium">{{ customer.name }}</span>
+                <span class="text-gray-400 ml-2 text-xs">{{ customer.email }}</span>
+              </li>
+            </ul>
+        </div>
           <input v-model="form.phone_number" placeholder="Phone"
           class="w-full border rounded-lg px-3 py-2 text-sm" />
         </div>
@@ -264,13 +317,12 @@ async function deleteBreak(id: number) {
           
         </div>
 
-        <div v-if="selection === 2" class="space-y-4">
+<div v-if="selection === 2" class="space-y-4">
 
   <h2 class="text-lg font-semibold">
     Egyéb elfoglaltság (szünetek / blokkolt idő)
   </h2>
 
-  <!-- CREATE BLOCK -->
   <div class="p-3 border rounded-lg space-y-2">
 
     <input
@@ -300,7 +352,6 @@ async function deleteBreak(id: number) {
     </button>
   </div>
 
-  <!-- LIST -->
   <div class="space-y-2">
 
     <div
@@ -323,36 +374,27 @@ async function deleteBreak(id: number) {
         törlés
       </button>
 
-    </div>
-
-  </div>
-
-</div>
-    
         </div>
       </div>
-      
-
+    </div>
   </div>
+</div>
+    
 
-
+</div>
   <div v-if="showServiceModal" class="fixed inset-0 bg-black/40 flex items-center justify-center z-[60]">
   <div class="bg-white w-full max-w-md rounded-xl p-4 space-y-3">
-
-    <!-- header -->
     <div class="flex justify-between items-center">
       <h3 class="font-semibold">Szolgáltatás kiválasztása</h3>
       <button @click="showServiceModal = false">✕</button>
     </div>
 
-    <!-- search -->
     <input
       v-model="search"
       placeholder="Keresés..."
       class="w-full border rounded-lg px-3 py-2 text-sm"
     />
 
-    <!-- list -->
     <div class="max-h-60 overflow-y-auto space-y-2">
       <div
         v-for="service in filteredServices"
@@ -371,5 +413,4 @@ async function deleteBreak(id: number) {
   :products="allProducts"
   @add="addProduct"
 />
-
 </template>

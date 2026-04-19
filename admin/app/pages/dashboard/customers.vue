@@ -4,7 +4,6 @@ definePageMeta({ middleware: 'auth' })
 const config = useRuntimeConfig()
 const apiBase = config.public.apiBase
 
-// 1. ADATOK LEKÉRÉSE
 const { data: currentUser } = await useFetch(`${apiBase}/api/user`, { 
   key: 'auth_user_appointments',
   credentials: 'include',

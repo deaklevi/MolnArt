@@ -124,7 +124,7 @@ const logout = async () => {
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
             </div>
-            <h3 class="text-xl font-bold text-slate-800 mb-2">Foglalások</h3>
+            <h3 class="text-xl font-bold text-slate-800 mb-2">Naptár</h3>
             <p class="text-slate-500 text-sm leading-relaxed">Időpontok kezelése, naptár és visszaigazolások.</p>
           </NuxtLink>
 
@@ -178,7 +178,6 @@ const logout = async () => {
 </template>
 
 <style scoped>
-/* A Tailwind mellett csak minimális egyedi CSS-re van szükség */
 .animate-spin {
   animation: spin 1s linear infinite;
 }
