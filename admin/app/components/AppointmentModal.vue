@@ -3,7 +3,7 @@
 const props = defineProps<{
   appointment: Record<string, any>
   isNew: boolean
-  services: { id: number; name: string }[]
+  services: { id: number; name: string; time:number }[]
 }>()
 
 const config = useRuntimeConfig()
@@ -402,7 +402,7 @@ async function deleteBreak(id: number) {
         @click="selectService(service)"
         class="p-3 rounded-lg border cursor-pointer hover:bg-violet-50"
       >
-        {{ service.name }}
+        {{ service.name }} - <span class="text-gray-500 italic"> {{ service.time }} perc </span>
       </div>
     </div>
 
