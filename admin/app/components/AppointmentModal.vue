@@ -36,6 +36,14 @@ function selectCustomer(customer: any) {
   showCustomerDropdown.value  = false
 }
 
+const matchedService = props.services?.find(s => s.name === props.appointment.service)
+
+const displayService = ref(
+  matchedService
+    ? `${matchedService.name} - ${matchedService.time} perc`
+    : props.appointment.service ?? ''
+)
+
 function onNameBlur() {
   setTimeout(() => { showCustomerDropdown.value = false }, 150)
 }
@@ -69,8 +77,9 @@ const filteredServices = computed(() => {
   )
 })
 
-function selectService(service: { id: number; name: string }) {
+function selectService(service: { id: number; name: string; time:number }) {
   form.service = service.name
+  displayService.value = `${service.name} - ${service.time} perc`
   showServiceModal.value = false
 }
 
@@ -239,7 +248,7 @@ async function deleteBreak(id: number) {
         
         <div class="grid grid-cols-10 gap-2">
           <input 
-            v-model="form.service"
+            v-model="displayService"
             placeholder="Service"
             class="w-full border rounded-lg px-3 py-2 text-sm col-span-9"
             readonly
