@@ -19,7 +19,6 @@ export const useAppointmentStore = defineStore('appointment', () => {
 
   //state
   const appointments = ref<any[]>([])
-  const breaks = ref<any[]>([])
   const isLoading = ref(true)
 
   //token

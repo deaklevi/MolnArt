@@ -82,12 +82,13 @@ async function loadAppointments() {
 
 
 const calendarEvents = computed(() => {
-  // Normal Appointments
+  console.log('Naptár adatok a store-ból:', appointments.value)
   const normalAppointments = appointmentStore.appointments.map((app: any) => ({
     id: app.id,
     title: app.service,
     start: app.appointment_from,
     end: app.appointment_to,
+    extendedProps: { raw: JSON.parse(JSON.stringify(app)) },
   }))
 
  
