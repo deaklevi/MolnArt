@@ -38,7 +38,10 @@ function getWeekDates(offset: number): string[] {
   return Array.from({ length: 7 }, (_, i) => {
     const d = new Date(monday)
     d.setDate(d.getDate() + i)
-    return d.toISOString().slice(0, 10)
+    
+    // MEGOLDÁS: Helyi időzóna kompenzálása az ISO stringhez
+    const localDate = new Date(d.getTime() - (d.getTimezoneOffset() * 60000))
+    return localDate.toISOString().slice(0, 10)
   })
 }
 

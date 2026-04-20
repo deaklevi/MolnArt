@@ -1,6 +1,5 @@
-<!-- components/admin/AppointmentCalendar.vue -->
 <script setup lang="ts">
-
+import { storeToRefs } from 'pinia'
 import FullCalendar from '@fullcalendar/vue3'
 import timeGridPlugin from '@fullcalendar/timegrid'
 import dayGridPlugin from '@fullcalendar/daygrid'
@@ -13,33 +12,25 @@ import type {
 } from '@fullcalendar/core'
 import type { EventResizeDoneArg } from '@fullcalendar/interaction'
 
+
+import { useAppointmentStore, type AppointmentForm } from '@/stores/appointmentStore'
+import { useBreakStore } from '@/stores/breakStore'
+import { useScheduleStore } from '@/stores/scheduleStore'
+
 const config = useRuntimeConfig()
 const baseUrl = config.public.apiBase
 const calendarRef = ref<any>(null)
 
-// ── TYPES ─────────────────────────────────────────────
-type AppointmentForm = {
-  appointment_from: string
-  appointment_to: string
-  service?: string
-  customer_id?: number | null
-  user_id?: number | null
-  email?: string
-  name?: string
-  phone_number?: string
-  used_products?: any[]
-}
+const appointmentStore = useAppointmentStore()
+const breakStore = useBreakStore()
+const scheduleStore = useScheduleStore()
+const { appointments, isLoading } = storeToRefs(appointmentStore)
 
-// ── STATE ─────────────────────────────────────────────
-const appointments = ref<any[]>([])
-const isLoading    = ref(true)
 const showModal    = ref(false)
 const selectedAppt = ref<any>(null)
 const isNewBooking = ref(false)
 const selectedIds  = ref<number[]>([])
-
-const isMobile = ref(false)
-
+const isMobile     = ref(false)
 
 const checkView = () => {
   isMobile.value = window.innerWidth < 768
@@ -50,31 +41,11 @@ const checkView = () => {
   const currentView = api.view.type
   const targetView = isMobile.value ? 'timeGridDay' : 'timeGridWeek'
 
-  // Only change if needed — avoid unnecessary re-renders
   if (currentView !== targetView) {
     api.changeView(targetView)
   }
 }
 
-// ── HELPERS ───────────────────────────────────────────
-
-// convert backend → input
-function formatForInput(date: string) {
-  return date?.slice(0, 16)
-}
-
-// convert input → backend
-function toBackendFormat(local: string) {
-  return local.replace('T', ' ') + ':00'
-}
-
-const getCsrfToken = (): string => {
-  if (import.meta.server) return ''
-  const match = document.cookie.match(new RegExp('(^| )XSRF-TOKEN=([^;]+)'))
-  return match?.[2] ? decodeURIComponent(match[2]) : ''
-}
-
-// ── FETCH USER ────────────────────────────────────────
 const { data: user } = await useFetch(`${baseUrl}/api/user`, {
   credentials: 'include',
   server: false,
@@ -101,41 +72,46 @@ const userServices = computed(() => {
   )
 })
 
-// ── FETCH APPOINTMENTS ────────────────────────────────
-async function fetchAppointments() {
-  isLoading.value = true
-  try {
-    const res = await $fetch<{ data: any[] }>(`${baseUrl}/api/appointments`, {
-      credentials: 'include',
-      headers: {
-        Accept: 'application/json',
-        'X-XSRF-TOKEN': getCsrfToken(),
-      },
-    })
-    appointments.value = res.data
-  } finally {
-    isLoading.value = false
-    nextTick(() =>{
-      checkView();
-    })
-  }
+
+async function loadAppointments() {
+  await appointmentStore.fetchAppointments()
+  nextTick(() =>{
+    checkView()
+  })
 }
 
 
-// ── EVENTS ────────────────────────────────────────────
-const calendarEvents = computed(() =>
-  appointments.value.map((appt) => ({
-    id: String(appt.id),
-    title: `${appt.customer?.name ?? 'Unknown'} — ${appt.service}`,
-    start: appt.appointment_from,
-    end: appt.appointment_to,
-    backgroundColor: '#7c3aed',
-    borderColor: '#6d28d9',
-    extendedProps: { raw: appt },
+const calendarEvents = computed(() => {
+  // Normal Appointments
+  const normalAppointments = appointmentStore.appointments.map((app: any) => ({
+    id: app.id,
+    title: app.service,
+    start: app.appointment_from,
+    end: app.appointment_to,
   }))
-)
 
-// ── CALENDAR CONFIG ───────────────────────────────────
+ 
+  const backgroundBreaks = breakStore.breaks.map((b: any) => ({
+    start: `${b.date}T${b.start}`,
+    end: `${b.date}T${b.end}`,
+    display: 'background',
+    color: '#ef4444' 
+  }))
+
+
+  const workingHours = (scheduleStore.schedule || []).map((wh: any) => ({
+    start: `${wh.date}T${wh.start}`,
+    end: `${wh.date}T${wh.end}`,
+    
+    display: 'background',
+    color: 'lightgreen', 
+  }))
+
+  return [...workingHours, ...backgroundBreaks, ...normalAppointments]
+})
+
+
+
 const calendarOptions = computed<CalendarOptions>(() => ({
   plugins: [timeGridPlugin, dayGridPlugin, interactionPlugin],
   initialView: 'timeGridWeek',
@@ -152,12 +128,12 @@ const calendarOptions = computed<CalendarOptions>(() => ({
     right: isMobile.value ? 'timeGridDay' : 'timeGridWeek,timeGridDay',
   },
 
-  events: calendarEvents.value,
+  firstDay:1,
   editable: true,
   selectable: true,
   nowIndicator: true,
   selectMirror: true,
-
+  events: calendarEvents.value,
   slotMinTime: '07:00:00',
   slotMaxTime: '21:30:00',
   allDaySlot: false,
@@ -193,151 +169,85 @@ const calendarOptions = computed<CalendarOptions>(() => ({
   snapDuration: '00:05:00',
   contentHeight: 'auto',
   expandRows: true,
-  
 
-  //mobile events
   longPressDelay: 300,
   eventLongPressDelay: 300,
   selectLongPressDelay: 300,
   eventStartEditable: true,
   eventDurationEditable: true,
 
+  titleFormat: isMobile.value ? {month:'short', day:'numeric'} : { year: 'numeric', month: 'long', day: 'numeric' },
 
-  titleFormat: isMobile.value ? {month:'short', day:'numeric'} : { year: 'numeric', month: 'long', day: 'numeric' }
+
 }))
 
-// ── HANDLERS ─────────────────────────────────────────
-
-// CLICK EXISTING
 function handleEventClick(info: EventClickArg) {
   selectedAppt.value = {
     ...info.event.extendedProps.raw,
-    appointment_from: formatForInput(info.event.startStr),
-    appointment_to: formatForInput(info.event.endStr),
+    appointment_from: appointmentStore.formatForInput(info.event.startStr),
+    appointment_to: appointmentStore.formatForInput(info.event.endStr),
   }
   isNewBooking.value = false
   showModal.value = true
 }
 
-// SELECT NEW SLOT
 function handleSlotSelect(info: DateSelectArg) {
   selectedAppt.value = {
-    appointment_from: formatForInput(info.startStr),
-    appointment_to: formatForInput(info.endStr),
+    appointment_from: appointmentStore.formatForInput(info.startStr),
+    appointment_to: appointmentStore.formatForInput(info.endStr),
   }
   isNewBooking.value = true
   showModal.value = true
 }
 
-// DRAG
-async function handleEventDrop(info: EventDropArg) {
-  await patchAppointmentTime(
-    info.event.id,
-    info.event.startStr,
-    info.event.endStr,
-    info.revert
-  )
-}
-
-// RESIZE
-async function handleEventResize(info: EventResizeDoneArg) {
-  await patchAppointmentTime(
-    info.event.id,
-    info.event.startStr,
-    info.event.endStr,
-    info.revert
-  )
-}
-
-// UPDATE TIME
-async function patchAppointmentTime(
-  id: string,
-  from: string,
-  to: string,
-  revert: () => void
-) {
+async function updateTime(id: string, startStr: string, endStr: string, revert: () => void) {
   try {
-    await $fetch(`${baseUrl}/api/appointments/${id}`, {
-      method: 'PUT',
-      credentials: 'include',
-      headers: {
-        'X-XSRF-TOKEN': getCsrfToken(),
-      },
-      body: {
-        appointment_from: toBackendFormat(formatForInput(from)),
-        appointment_to: toBackendFormat(formatForInput(to)),
-      },
-    })
-    await fetchAppointments()
+    await appointmentStore.patchAppointmentTime(id, startStr, endStr)
   } catch {
     revert()
-    alert('Időpont ütközés!')
+    alert('Időpont ütközés vagy hiba történt!')
   }
 }
 
-// SAVE (CREATE / UPDATE)
+async function handleEventDrop(info: EventDropArg) {
+  await updateTime(info.event.id, info.event.startStr, info.event.endStr, info.revert)
+}
+
+
+async function handleEventResize(info: EventResizeDoneArg) {
+  await updateTime(info.event.id, info.event.startStr, info.event.endStr, info.revert)
+}
+
+
 async function handleSave(formData: AppointmentForm) {
-  const url = isNewBooking.value
-    ? `${baseUrl}/api/appointments`
-    : `${baseUrl}/api/appointments/${selectedAppt.value.id}`
-
-  const method = isNewBooking.value ? 'POST' : 'PUT'
-
-  await $fetch(`${baseUrl}/sanctum/csrf-cookie`, {
-    credentials: 'include'
-  })
-
-  await $fetch(url, {
-    method,
-    credentials: 'include',
-    headers: {
-      'X-XSRF-TOKEN': getCsrfToken(),
-      Accept: 'application/json',
-    },
-    body: {
-      ...formData,
-      customer_id: formData.customer_id ?? 1, 
-      user_id: 1,
-      appointment_from: toBackendFormat(formData.appointment_from),
-      appointment_to: toBackendFormat(formData.appointment_to),
-    }
-  })
-
+  await appointmentStore.saveAppointment(
+    formData,
+    isNewBooking.value,
+    selectedAppt.value?.id
+  )
   showModal.value = false
-  await fetchAppointments()
 }
 
-// DELETE
+
 async function handleDelete(id: number) {
-  await $fetch(`${baseUrl}/sanctum/csrf-cookie`, {
-    credentials: 'include'
-  })
-
-  await $fetch(`${baseUrl}/api/appointments/${id}`, {
-    method: 'DELETE',
-    credentials: 'include',
-    headers: {
-      'X-XSRF-TOKEN': getCsrfToken(),
-    }
-  })
-
+  await appointmentStore.deleteAppointment(id)
   showModal.value = false
-  await fetchAppointments()
 }
 
-onMounted(() => {
+onMounted(async() => {
   nextTick(() => {
     checkView()
   })
   window.addEventListener('resize', checkView)
-  fetchAppointments()
+  loadAppointments()
+  breakStore.fetchBreaks()
+  await scheduleStore.fetchSchedule()
+  console.log(scheduleStore.schedule)
 })
 
 onBeforeUnmount(() => {
   window.removeEventListener('resize', checkView)
 })
-
-
 </script>
 
 <template>
@@ -347,7 +257,12 @@ onBeforeUnmount(() => {
     </div>
 
     <ClientOnly v-else class="flex-1">
-      <FullCalendar ref="calendarRef" :options="calendarOptions" class="h-full" />
+      <FullCalendar 
+        ref="calendarRef" 
+        :options="calendarOptions" 
+        :events="calendarEvents" 
+        class="h-full" 
+      />
     </ClientOnly>
 
     <AppointmentModal
