@@ -15,6 +15,7 @@ import type { EventResizeDoneArg } from '@fullcalendar/interaction'
 
 import { useAppointmentStore, type AppointmentForm } from '@/stores/appointmentStore'
 import { useBreakStore } from '@/stores/breakStore'
+import { useScheduleStore } from '@/stores/scheduleStore'
 
 const config = useRuntimeConfig()
 const baseUrl = config.public.apiBase
@@ -22,6 +23,7 @@ const calendarRef = ref<any>(null)
 
 const appointmentStore = useAppointmentStore()
 const breakStore = useBreakStore()
+const scheduleStore = useScheduleStore()
 const { appointments, isLoading } = storeToRefs(appointmentStore)
 
 const showModal    = ref(false)
@@ -80,22 +82,34 @@ async function loadAppointments() {
 
 
 const calendarEvents = computed(() => {
-  const normalAppointments = appointments.value.map((app: any) => ({
+  // Normal Appointments
+  const normalAppointments = appointmentStore.appointments.map((app: any) => ({
     id: app.id,
     title: app.service,
     start: app.appointment_from,
     end: app.appointment_to,
   }))
 
-  const backgroundBreaks = breakStore.breaks.map((b: { date: string; start: string; end: string }) => ({
+ 
+  const backgroundBreaks = breakStore.breaks.map((b: any) => ({
     start: `${b.date}T${b.start}`,
     end: `${b.date}T${b.end}`,
     display: 'background',
-    color: '#fa6161' 
+    color: '#ef4444' 
   }))
 
-  return [...normalAppointments, ...backgroundBreaks]
+
+  const workingHours = (scheduleStore.schedule || []).map((wh: any) => ({
+    start: `${wh.date}T${wh.start}`,
+    end: `${wh.date}T${wh.end}`,
+    
+    display: 'background',
+    color: 'lightgreen', 
+  }))
+
+  return [...workingHours, ...backgroundBreaks, ...normalAppointments]
 })
+
 
 
 const calendarOptions = computed<CalendarOptions>(() => ({
@@ -114,12 +128,12 @@ const calendarOptions = computed<CalendarOptions>(() => ({
     right: isMobile.value ? 'timeGridDay' : 'timeGridWeek,timeGridDay',
   },
 
-  events: calendarEvents.value,
+  firstDay:1,
   editable: true,
   selectable: true,
   nowIndicator: true,
   selectMirror: true,
-
+  events: calendarEvents.value,
   slotMinTime: '07:00:00',
   slotMaxTime: '21:30:00',
   allDaySlot: false,
@@ -163,11 +177,8 @@ const calendarOptions = computed<CalendarOptions>(() => ({
   eventDurationEditable: true,
 
   titleFormat: isMobile.value ? {month:'short', day:'numeric'} : { year: 'numeric', month: 'long', day: 'numeric' },
-  businessHours: {
-    daysOfWeek: [ 1, 2, 3, 4, 5 ], 
-    startTime: '08:00', 
-    endTime: '18:00',   
-  }
+
+
 }))
 
 function handleEventClick(info: EventClickArg) {
@@ -223,13 +234,15 @@ async function handleDelete(id: number) {
   showModal.value = false
 }
 
-onMounted(() => {
+onMounted(async() => {
   nextTick(() => {
     checkView()
   })
   window.addEventListener('resize', checkView)
   loadAppointments()
   breakStore.fetchBreaks()
+  await scheduleStore.fetchSchedule()
+  console.log(scheduleStore.schedule)
 })
 
 onBeforeUnmount(() => {
@@ -244,7 +257,12 @@ onBeforeUnmount(() => {
     </div>
 
     <ClientOnly v-else class="flex-1">
-      <FullCalendar ref="calendarRef" :options="calendarOptions" class="h-full" />
+      <FullCalendar 
+        ref="calendarRef" 
+        :options="calendarOptions" 
+        :events="calendarEvents" 
+        class="h-full" 
+      />
     </ClientOnly>
 
     <AppointmentModal
