@@ -14,13 +14,14 @@ import type { EventResizeDoneArg } from '@fullcalendar/interaction'
 
 
 import { useAppointmentStore, type AppointmentForm } from '@/stores/appointmentStore'
+import { useBreakStore } from '@/stores/breakStore'
 
 const config = useRuntimeConfig()
 const baseUrl = config.public.apiBase
 const calendarRef = ref<any>(null)
 
-
 const appointmentStore = useAppointmentStore()
+const breakStore = useBreakStore()
 const { appointments, isLoading } = storeToRefs(appointmentStore)
 
 const showModal    = ref(false)
@@ -78,17 +79,23 @@ async function loadAppointments() {
 }
 
 
-const calendarEvents = computed(() =>
-  appointments.value.map((appt: any) => ({
-    id: String(appt.id),
-    title: `${appt.customer?.name ?? 'Unknown'} — ${appt.service}`,
-    start: appt.appointment_from,
-    end: appt.appointment_to,
-    backgroundColor: '#7c3aed',
-    borderColor: '#6d28d9',
-    extendedProps: { raw: appt },
+const calendarEvents = computed(() => {
+  const normalAppointments = appointments.value.map((app: any) => ({
+    id: app.id,
+    title: app.service,
+    start: app.appointment_from,
+    end: app.appointment_to,
   }))
-)
+
+  const backgroundBreaks = breakStore.breaks.map((b: { date: string; start: string; end: string }) => ({
+    start: `${b.date}T${b.start}`,
+    end: `${b.date}T${b.end}`,
+    display: 'background',
+    color: '#fa6161' 
+  }))
+
+  return [...normalAppointments, ...backgroundBreaks]
+})
 
 
 const calendarOptions = computed<CalendarOptions>(() => ({
@@ -155,7 +162,12 @@ const calendarOptions = computed<CalendarOptions>(() => ({
   eventStartEditable: true,
   eventDurationEditable: true,
 
-  titleFormat: isMobile.value ? {month:'short', day:'numeric'} : { year: 'numeric', month: 'long', day: 'numeric' }
+  titleFormat: isMobile.value ? {month:'short', day:'numeric'} : { year: 'numeric', month: 'long', day: 'numeric' },
+  businessHours: {
+    daysOfWeek: [ 1, 2, 3, 4, 5 ], 
+    startTime: '08:00', 
+    endTime: '18:00',   
+  }
 }))
 
 function handleEventClick(info: EventClickArg) {
@@ -217,6 +229,7 @@ onMounted(() => {
   })
   window.addEventListener('resize', checkView)
   loadAppointments()
+  breakStore.fetchBreaks()
 })
 
 onBeforeUnmount(() => {

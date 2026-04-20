@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import { ref } from 'vue'
 //type
 export type AppointmentForm = {
   appointment_from: string
@@ -18,6 +19,7 @@ export const useAppointmentStore = defineStore('appointment', () => {
 
   //state
   const appointments = ref<any[]>([])
+  const breaks = ref<any[]>([])
   const isLoading = ref(true)
 
   //token

@@ -18,11 +18,8 @@ const breakForm = ref({
 
 function handleAdd() {
   if (!breakForm.value.date || !breakForm.value.start || !breakForm.value.end) return
-  
-  // Felküldjük a szülőnek az adatokat mentésre
   emit('add', { ...breakForm.value })
   
-  // Form ürítése
   breakForm.value.start = ''
   breakForm.value.end = ''
 }
