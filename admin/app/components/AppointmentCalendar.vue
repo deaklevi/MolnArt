@@ -118,9 +118,9 @@ const calendarOptions = computed<CalendarOptions>(() => ({
 
   headerToolbar: isMobile.value
   ?{
-    left: 'prev,next',
+    left: 'prev,next,today',
     center:'title',
-    right:'today'
+    right: 'timeGridDay,timeGridWeek',
   } 
   :{
     left: 'prev,next today',
@@ -176,8 +176,16 @@ const calendarOptions = computed<CalendarOptions>(() => ({
   eventStartEditable: true,
   eventDurationEditable: true,
 
-  titleFormat: isMobile.value ? {month:'short', day:'numeric'} : { year: 'numeric', month: 'long', day: 'numeric' },
+  titleFormat: isMobile.value 
+  ? {month:'short', day:'numeric'} 
+  : { year: 'numeric', month: 'long', day: 'numeric' },
 
+  buttonText:{
+    today:"Ma",
+    week:"Hét",
+    day:"Nap"
+  },
+  
 
 }))
 
@@ -276,3 +284,4 @@ onBeforeUnmount(() => {
     />
   </div>
 </template>
+
