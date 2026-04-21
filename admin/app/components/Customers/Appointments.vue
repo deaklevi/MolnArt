@@ -47,7 +47,7 @@ const prev = () => {
 
       <div class="pt-4 border-t border-slate-200">
         <p class="text-xs font-bold uppercase text-slate-400 mb-2 tracking-wider">Használt termékek</p>
-        <ul v-if="currentAppointment.products?.length" class="space-y-1">
+        <ul v-if="currentAppointment.products?.length" class="space-y-2 overflow-y-auto pr-2 max-h-52">
           <li v-for="product in currentAppointment.products" :key="product.id" class="flex justify-between text-sm">
             <span>{{ product.name }}</span>
             <span class="font-mono bg-slate-200 px-2 rounded">{{ product.quantity }} {{ product.unit }}</span>
