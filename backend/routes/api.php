@@ -23,17 +23,19 @@ Route::apiResource('/user_public_data', AuthController::class)->only('index');
 
 Route::post('/appointments', [AppointmentController::class, 'store']);
 Route::get('/appointments/slots', [AppointmentController::class, 'availableSlots']);
-Route::apiResource('appointments', AppointmentController::class);
+
 
 Route::apiResource('services', ServiceController::class);
 Route::apiResource('reviews', ReviewController::class);
-Route::apiResource('customers', CustomerController::class);
 Route::apiResource('products',ProductController::class);
 
 
 // Védett
 Route::middleware('auth:sanctum')->group(function () {
-    
+    Route::apiResource('customers', CustomerController::class);
+    //Route::get('/customers', [CustomerController::class, 'index']);
+    Route::apiResource('appointments', AppointmentController::class);
+
     Route::apiResource('schedule',ScheduleController::class);
     Route::post('/user/update', [AuthController::class, 'updateProfile']);
 

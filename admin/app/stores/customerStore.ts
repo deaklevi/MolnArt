@@ -29,6 +29,7 @@ export const useCustomerStore = defineStore('customer', () => {
         credentials: 'include',
         headers: {
           Accept: 'application/json',
+          'X-XSRF-TOKEN': getCsrfToken(),
         },
       })
       customers.value = res.data ?? []
