@@ -89,7 +89,31 @@
               </button>
             </div>
           </div>
+          <div v-if="isReservationModalOpen" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/40 backdrop-blur-sm">
+            <div class="bg-white rounded-3xl p-8 shadow-2xl w-full max-w-sm border border-stone-100">
+              <h3 class="text-lg font-bold text-gray-900 mb-6 uppercase tracking-widest">Foglalás véglegesítése</h3>
+              
+              <div class="space-y-4">
+                <div>
+                  <label class="block text-[10px] font-bold text-stone-400 uppercase mb-1">Név</label>
+                  <input v-model="customerData.name" type="text" placeholder="Teljes név" class="w-full px-4 py-3 rounded-xl border border-stone-200 focus:ring-2 focus:ring-purple-900 outline-none">
+                </div>
+                <div>
+                  <label class="block text-[10px] font-bold text-stone-400 uppercase mb-1">Email</label>
+                  <input v-model="customerData.email" type="email" placeholder="email@cim.hu" class="w-full px-4 py-3 rounded-xl border border-stone-200 focus:ring-2 focus:ring-purple-900 outline-none">
+                </div>
+              </div>
 
+              <div class="flex gap-3 mt-8">
+                <button @click="isReservationModalOpen = false" class="flex-1 py-3 rounded-xl font-bold text-xs border border-bg-stone-100 uppercase text-stone-500 hover:bg-stone-100 transition-all">
+                  Mégse
+                </button>
+                <button @click="submitReservation" class="flex-1 bg-purple-900 text-white py-3 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-purple-800 transition-all">
+                  Foglalás
+                </button>
+              </div>
+            </div>
+          </div>
           <div v-if="selectedWorker" class="bg-white p-6 md:p-8 rounded-3xl shadow-sm border border-stone-100">
             <h3 class="text-xs font-black text-purple-900 uppercase tracking-widest mb-4">Bemutatkozás</h3>
             <h2 class="text-xl font-serif text-gray-950 mb-3">{{ selectedWorker.user_name }}</h2>
@@ -102,7 +126,6 @@
               </div>
             </div>
           </div>
-
         </div>
       </div>
     </div>
@@ -151,6 +174,35 @@ const selectedWorker = ref(null);
 
 const totalSum = computed(() => cart.value.reduce((total, i) => total + Number(i.price || 0), 0));
 
+// Új state-ek
+const isReservationModalOpen = ref(false);
+const customerData = ref({ name: '', email: '' });
+
+// Módosított függvény
+const handleFinalConfirm = () => {
+  if (cart.value.length === 0) return;
+  isReservationModalOpen.value = true;
+};
+
+// Az új foglaláskezelő függvény (ide jön majd a backend hívás)
+const submitReservation = async () => {
+  if (!customerData.value.name || !customerData.value.email) {
+    alert('Kérlek töltsd ki a mezőket!');
+    return;
+  }
+  
+  console.log('Foglalás adatai:', { 
+    customer: customerData.value, 
+    cart: cart.value,
+    worker: selectedWorker.value 
+  });
+
+  // Itt fogjuk meghívni a backendet
+  isReservationModalOpen.value = false;
+  alert('Foglalás sikeresen elküldve!');
+  cart.value = [];
+};
+
 const handleAddToCart = (bookingData) => {
   cart.value.push({
     id: Date.now(),
@@ -167,11 +219,6 @@ const handleAddToCart = (bookingData) => {
 const openCalendarFor = (service) => {
   pendingService.value = service;
   isCalendarOpen.value = true;
-};
-
-const handleFinalConfirm = async () => {
-  alert('Foglalás sikeresen elküldve!');
-  cart.value = [];
 };
 
 const { data: publicUsers } = await useAsyncData('users', () =>
