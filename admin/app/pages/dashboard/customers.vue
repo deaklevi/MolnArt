@@ -1,12 +1,25 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { useCustomerStore } from '@/stores/customerStore';
-
 import type { Customer } from '@/stores/customerStore'; 
 
 const customerStore = useCustomerStore();
-
 const selectedCustomer = ref<Customer | null>(null);
+const searchQuery = ref('');
+const filteredCustomers = computed(() => {
+  const query = searchQuery.value.toLowerCase().trim();
+  if (!query) {
+    return customerStore.customers;
+  }
+
+  return customerStore.customers.filter((customer) => {
+    return (
+      customer.name.toLowerCase().includes(query) ||
+      (customer.email && customer.email.toLowerCase().includes(query)) ||
+      (customer.phone_number && customer.phone_number.includes(query))
+    );
+  });
+});
 
 onMounted(async () => {
   await customerStore.fetchCustomers();
@@ -34,16 +47,40 @@ const selectCustomer = (customer: Customer) => {
     </div>
 
     <ClientOnly class="mt-10">
-      <div class="grid grid-cols-2 gap-4 mt-10">
-        <div class="space-y-4">
-          <CustomersCard 
-            v-for="customer in customerStore.customers" 
-            :key="customer.id"
-            :customer="customer" 
-            :class="{ 'ring-2 ring-blue-500': selectedCustomer?.id === customer.id }"
-            @click="selectCustomer(customer)"
-            class="cursor-pointer transition-all"
-          />
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-10">
+        <div class="flex flex-col h-[75vh]">
+          
+          <div class="mb-6 relative">
+            <input 
+              v-model="searchQuery" 
+              type="text" 
+              placeholder="Keresés név, email vagy telefon alapján..." 
+              class="w-full pl-10 pr-4 py-3 bg-white border border-slate-200 rounded-xl shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+            >
+            <span class="absolute left-3 top-3.5 text-slate-400">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </span>
+          </div>
+
+          <div class="space-y-3 overflow-y-auto pr-2 pb-4">
+            <template v-if="filteredCustomers.length > 0">
+              <CustomersCard 
+                v-for="customer in filteredCustomers" 
+                :key="customer.id"
+                :customer="customer" 
+                :class="{ 'ring-2 ring-[#36082A] ring-inset': selectedCustomer?.id === customer.id }"
+                @click="selectCustomer(customer)"
+                class="cursor-pointer transition-all hover:shadow-md "
+              />
+            </template>
+            
+            <div v-else class="text-center py-10 text-slate-500 bg-slate-50 rounded-xl border border-slate-200 border-dashed">
+              Nincs a keresésnek megfelelő ügyfél.
+            </div>
+          </div>
+
         </div>
 
         <div>
@@ -52,6 +89,7 @@ const selectCustomer = (customer: Customer) => {
             Válassz egy ügyfelet a megtekintéshez
           </div>
         </div>
+        
       </div>
     </ClientOnly>
   </div>
