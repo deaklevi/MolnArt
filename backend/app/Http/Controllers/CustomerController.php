@@ -6,6 +6,7 @@ use App\Models\Customer;
 use App\Http\Requests\StoreCustomerRequest;
 use App\Http\Requests\UpdateCustomerRequest;
 use App\Http\Resources\CustomerResource;
+use Illuminate\Support\Facades\Auth;
 
 class CustomerController extends Controller
 {
@@ -14,7 +15,11 @@ class CustomerController extends Controller
      */
     public function index()
     {
-        return CustomerResource::collection(Customer::with('user','appointments')->get());
+        $customers = Customer::where('user_id',Auth::id())->with(['user','appointments.products'])->latest()->get();
+        
+        return CustomerResource::collection($customers);
+
+        //return CustomerResource::collection(Customer::with('user','appointments')->get());
     }
 
     /**
