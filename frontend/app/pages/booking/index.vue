@@ -100,7 +100,11 @@
                 </div>
                 <div>
                   <label class="block text-[10px] font-bold text-stone-400 uppercase mb-1">Email</label>
-                  <input v-model="customerData.email" type="email" placeholder="email@cim.hu" class="w-full px-4 py-3 rounded-xl border border-stone-200 focus:ring-2 focus:ring-purple-900 outline-none">
+                  <input v-model="customerData.email" type="email" placeholder="email@example.hu" class="w-full px-4 py-3 rounded-xl border border-stone-200 focus:ring-2 focus:ring-purple-900 outline-none">
+                </div>
+                <div>
+                  <label class="block text-[10px] font-bold text-stone-400 uppercase mb-1">Telefonszám</label>
+                  <input v-model="customerData.phone_number" type="text" placeholder="+36201234567" class="w-full px-4 py-3 rounded-xl border border-stone-200 focus:ring-2 focus:ring-purple-900 outline-none">
                 </div>
               </div>
 
@@ -162,7 +166,39 @@
 <script setup>
 import { ref, watch, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+// index.vue - script setup
+import { useAppointmentStore } from '~/stores/appointmentStore'; // Importáld a store-t
+const appointmentStore = useAppointmentStore();
 
+// index.vue - a submitReservation függvényben
+const submitReservation = async () => {
+  // Opcionálisan itt ellenőrizheted a telefonszámot is, ha kötelező
+  if (!customerData.value.name || !customerData.value.email) {
+    alert('Kérlek töltsd ki a neved és az emailed!');
+    return;
+  }
+
+  try {
+    for (const item of cart.value) {
+      const payload = {
+        appointment_from: item.startTime, 
+        appointment_to: item.endTime,
+        service: item.name,
+        user_id: selectedWorker.value.id,
+        name: customerData.value.name,
+        email: customerData.value.email,
+        phone_number: customerData.value.phone_number // <--- Itt a javítás
+      };
+
+      await appointmentStore.saveAppointment(payload, true);
+    }
+
+    alert('Sikeres foglalás!');
+    cart.value = [];
+    isReservationModalOpen.value = false;
+  } catch (error) {
+  }
+};
 const config = useRuntimeConfig();
 const router = useRouter();
 const route  = useRoute();
@@ -176,31 +212,17 @@ const totalSum = computed(() => cart.value.reduce((total, i) => total + Number(i
 
 // Új state-ek
 const isReservationModalOpen = ref(false);
-const customerData = ref({ name: '', email: '' });
+// index.vue - a script részben
+const customerData = ref({ 
+  name: '', 
+  email: '', 
+  phone_number: ''
+});
 
 // Módosított függvény
 const handleFinalConfirm = () => {
   if (cart.value.length === 0) return;
   isReservationModalOpen.value = true;
-};
-
-// Az új foglaláskezelő függvény (ide jön majd a backend hívás)
-const submitReservation = async () => {
-  if (!customerData.value.name || !customerData.value.email) {
-    alert('Kérlek töltsd ki a mezőket!');
-    return;
-  }
-  
-  console.log('Foglalás adatai:', { 
-    customer: customerData.value, 
-    cart: cart.value,
-    worker: selectedWorker.value 
-  });
-
-  // Itt fogjuk meghívni a backendet
-  isReservationModalOpen.value = false;
-  alert('Foglalás sikeresen elküldve!');
-  cart.value = [];
 };
 
 const handleAddToCart = (bookingData) => {

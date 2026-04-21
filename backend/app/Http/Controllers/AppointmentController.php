@@ -38,11 +38,15 @@ class AppointmentController extends Controller
     }
 
     public function store(StoreAppointmentRequest $request): AppointmentResource
-    {
-        $appointment = $this->service->book($request, Auth::id());
+{
+    // Módosítás: Ne az Auth::id()-t, hanem a request-ből érkező user_id-t használd
+    // A StoreAppointmentRequest-ben győződj meg róla, hogy a 'user_id' validálva van
+    $userId = $request->input('user_id'); 
+    
+    $appointment = $this->service->book($request, $userId);
 
-        return new AppointmentResource($appointment);
-    }   
+    return new AppointmentResource($appointment);
+} 
 
     public function update(UpdateAppointmentRequest $request, Appointment $appointment): AppointmentResource
     {
