@@ -7,11 +7,9 @@ const form = ref({
 const config = useRuntimeConfig();
 const apiBase = config.public.apiBase;
 
-// Ez a kis segédfüggvény kiolvassa a böngészőből a Laravel által adott tokent
 const getCsrfToken = () => {
   const match = document.cookie.match(new RegExp('(^| )XSRF-TOKEN=([^;]+)'));
   if (match) {
-    // A Laravel kódolja az URL-t, ezt vissza kell fejteni
     return decodeURIComponent(match[2]); 
   }
   return null;
@@ -34,13 +32,12 @@ const login = async () => {
       credentials: 'include',
       headers: {
         'Accept': 'application/json',
-        'X-Requested-With': 'XMLHttpRequest', // Szólunk, hogy ez egy AJAX kérés
-        'X-XSRF-TOKEN': csrfToken // <--- EZ A KULCS, ami miatt eddig 419-et kaptál!
+        'X-Requested-With': 'XMLHttpRequest',
+        'X-XSRF-TOKEN': csrfToken 
       }
     });
 
     
-    // Ha idáig eljut, a 419 eltűnt, és sikeres a belépés!
     navigateTo('/dashboard');
     let userlog = await $fetch('http://localhost:8000/api/user', {
   credentials: 'include'

@@ -15,11 +15,10 @@ const getCsrfToken = () => {
   return null;
 }
 
-// Fontos: server: false, hogy ne akadjon össze az SSR-el süti hiányában
 const { data: user, pending, error } = await useFetch(`${apiBase}/api/user`, {
   credentials: 'include',
   server: false, 
-  lazy: false // Megvárjuk, amíg az adat megjön
+  lazy: false
 })
 
 const logout = async () => {
@@ -30,16 +29,13 @@ const logout = async () => {
       headers: {
         'Accept': 'application/json',
         'X-Requested-With': 'XMLHttpRequest',
-        // Ha továbbra is 419-et dobna a logout, ide is kell a CSRF:
         'X-XSRF-TOKEN': getCsrfToken() 
       }
     });
-    
-    // Siker esetén töröljük a lokális dolgokat és irány a login
+
     navigateTo('/'); 
   } catch (error) {
     console.error("Logout hiba:", error);
-    // Még ha hiba is van (pl. lejárt session), érdemes visszavinni a felhasználót
     navigateTo('/');
   }
 }
