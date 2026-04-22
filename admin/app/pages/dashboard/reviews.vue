@@ -80,8 +80,8 @@ const deleteReview = async (reviewId) => {
         
         <div class="flex justify-between items-center mb-6">
           <h1 class="text-3xl font-black text-slate-900">Vélemények Kezelése</h1>
-          <NuxtLink to="/dashboard" class="px-5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold transition-all">
-            ← Vissza
+          <NuxtLink to="/dashboard" class="px-5 py-2.5 bg-white border border-slate-200 text-slate-600 rounded-xl text-sm font-bold hover:bg-slate-50 transition-all shadow-sm">
+            ← Irányítópult
           </NuxtLink>
         </div>
         <div v-if="myProfile.reviews?.length > 0" class="grid grid-cols-1 md:grid-cols-2 gap-6">
