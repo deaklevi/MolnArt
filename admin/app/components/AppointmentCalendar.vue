@@ -82,12 +82,13 @@ async function loadAppointments() {
 
 
 const calendarEvents = computed(() => {
-  // Normal Appointments
+  console.log('Naptár adatok a store-ból:', appointments.value)
   const normalAppointments = appointmentStore.appointments.map((app: any) => ({
     id: app.id,
     title: app.service,
     start: app.appointment_from,
     end: app.appointment_to,
+    extendedProps: { raw: JSON.parse(JSON.stringify(app)) },
   }))
 
  
@@ -118,9 +119,9 @@ const calendarOptions = computed<CalendarOptions>(() => ({
 
   headerToolbar: isMobile.value
   ?{
-    left: 'prev,next',
+    left: 'prev,next,today',
     center:'title',
-    right:'today'
+    right: 'timeGridDay,timeGridWeek',
   } 
   :{
     left: 'prev,next today',
@@ -176,8 +177,16 @@ const calendarOptions = computed<CalendarOptions>(() => ({
   eventStartEditable: true,
   eventDurationEditable: true,
 
-  titleFormat: isMobile.value ? {month:'short', day:'numeric'} : { year: 'numeric', month: 'long', day: 'numeric' },
+  titleFormat: isMobile.value 
+  ? {month:'short', day:'numeric'} 
+  : { year: 'numeric', month: 'long', day: 'numeric' },
 
+  buttonText:{
+    today:"Ma",
+    week:"Hét",
+    day:"Nap"
+  },
+  
 
 }))
 
@@ -276,3 +285,4 @@ onBeforeUnmount(() => {
     />
   </div>
 </template>
+

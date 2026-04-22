@@ -5,8 +5,8 @@
         <h1 class="text-slate-800 text-3xl font-bold tracking-tight">Raktárkészlet</h1>
         <p class="text-slate-500 text-sm mt-1">Aktuális készletszintek és termékadatok.</p>
       </div>
-      <NuxtLink to="/dashboard" class="px-5 py-2 bg-white hover:bg-slate-50 text-slate-600 border border-slate-200 shadow-sm rounded-xl font-semibold transition-all flex items-center gap-2">
-        <span>←</span> Vissza
+      <NuxtLink to="/dashboard" class="px-5 py-2.5 bg-white border border-slate-200 text-slate-600 rounded-xl text-sm font-bold hover:bg-slate-50 transition-all shadow-sm">
+        ← Irányítópult
       </NuxtLink>
     </header>
 
@@ -34,10 +34,27 @@
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         <div v-for="item in filteredProducts" :key="item.id" class="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm hover:shadow-md transition-all duration-300 group relative overflow-hidden">
           <div v-if="item.stock <= 10" class="absolute left-0 top-0 bottom-0 w-1.5 bg-rose-500"></div>
+          
           <div class="mb-4">
-            <h2 class="text-slate-800 text-lg font-bold leading-tight mb-1">{{ item.name }}</h2>
-            <span class="text-slate-400 text-[10px] font-mono uppercase tracking-widest">SKU #{{ item.id }}</span>
+            <div class="flex justify-between items-start">
+              <div>
+                <h2 class="text-slate-800 text-lg font-bold leading-tight mb-1">{{ item.name }}</h2>
+                <span class="text-slate-400 text-[10px] font-mono uppercase tracking-widest">SKU #{{ item.id }}</span>
+              </div>
+              <!-- DELETE BUTTON -->
+              <button
+                @click="deleteProduct(item.id)"
+                :disabled="isDeleting === item.id"
+                class="p-2.5 text-slate-300 hover:text-rose-500 hover:bg-rose-50 rounded-xl transition-all"
+              >
+                <svg v-if="isDeleting !== item.id" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+                <div v-else class="w-6 h-6 border-2 border-rose-500 border-t-transparent rounded-full animate-spin"></div>
+              </button>
+            </div>
           </div>
+
           <div class="flex items-end justify-between border-t border-slate-50 pt-4 mt-2">
             <div class="flex flex-col items-start">
               <span class="text-slate-400 text-[10px] uppercase font-bold tracking-wider mb-1">Készleten</span>
@@ -53,10 +70,10 @@
         </div>
       </div> 
     </div>
+
+    <!-- EDIT MODAL -->
     <div v-if="isEditOpen && editingProduct" class="fixed inset-0 z-[60] flex items-center justify-center p-4">
-
       <div @click="isEditOpen = false" class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity"></div>
-
       <div class="relative bg-white rounded-[2rem] shadow-2xl max-w-lg w-full overflow-hidden transform transition-all animate-in zoom-in duration-300">
         <div class="bg-slate-50 px-8 py-6 border-b border-slate-100 flex justify-between items-center">
           <h3 class="text-xl font-bold text-slate-800">Termék szerkesztése</h3>
@@ -74,24 +91,20 @@
               Jelenleg: <span class="text-slate-800 font-bold">{{ editingProduct.stock }} g</span>
             </div>
           </div>
-
           <div class="space-y-1">
             <label class="text-[10px] uppercase font-bold text-slate-400 ml-1 tracking-widest">Hozzáadandó mennyiség (g)</label>
-            <input v-model="addAmount" type="number" placeholder="Pl: 1200"class="w-full bg-slate-50 border-2 border-blue-100 rounded-2xl p-4 focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all text-2xl font-black text-blue-600">
+            <input v-model="addAmount" type="number" placeholder="Pl: 1200" class="w-full bg-slate-50 border-2 border-blue-100 rounded-2xl p-4 focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all text-2xl font-black text-blue-600">
             <p class="text-[10px] text-slate-400 mt-2 ml-1 italic">* Negatív számmal vonhatsz le a készletből.</p>
           </div>
         </div>
-
         <div class="p-8 pt-0 flex gap-3">
-          <button @click="isEditOpen = false" class="flex-1 py-4 bg-slate-100 text-slate-600 rounded-2xl font-bold hover:bg-slate-200 transition-all">
-            Mégse
-          </button>
-          <button @click="updateStock" class="flex-1 py-4 bg-blue-600 text-white rounded-2xl font-bold hover:bg-blue-700 shadow-lg shadow-blue-200 transition-all">
-            Változtatások mentése
-          </button>
+          <button @click="isEditOpen = false" class="flex-1 py-4 bg-slate-100 text-slate-600 rounded-2xl font-bold hover:bg-slate-200 transition-all">Mégse</button>
+          <button @click="updateStock" class="flex-1 py-4 bg-blue-600 text-white rounded-2xl font-bold hover:bg-blue-700 shadow-lg shadow-blue-200 transition-all">Változtatások mentése</button>
         </div>
       </div>
     </div>
+
+    <!-- FAB -->
     <div class="fixed bottom-8 right-8 z-40">
       <button @click="isOpen = true" class="flex items-center justify-center w-14 h-14 bg-emerald-600 text-white rounded-full shadow-xl hover:bg-emerald-700 hover:scale-110 active:scale-95 transition-all">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-8 h-8">
@@ -100,9 +113,9 @@
       </button>
     </div>
 
+    <!-- ADD MODAL -->
     <div v-if="isOpen" class="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div @click="isOpen = false" class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity"></div>
-
       <div class="relative bg-white rounded-[2.5rem] p-8 md:p-10 max-w-md w-full shadow-2xl transform transition-all animate-in zoom-in duration-200">
         <div class="flex justify-between items-center mb-8">
           <h2 class="text-2xl font-black text-slate-800 tracking-tight">Új termék</h2>
@@ -114,7 +127,6 @@
             <label class="text-[10px] uppercase font-bold text-slate-400 tracking-widest ml-1">Termék neve</label>
             <input v-model="formData.name" type="text" placeholder="Pl: INOA 5.1" class="w-full bg-slate-50 border-none rounded-2xl p-4 focus:ring-2 focus:ring-emerald-500/20 outline-none transition-all placeholder:text-slate-300">
           </div>
-
           <div class="grid grid-cols-2 gap-4">
             <div class="space-y-1">
               <label class="text-[10px] uppercase font-bold text-slate-400 tracking-widest ml-1">Készlet</label>
@@ -123,11 +135,13 @@
             <div class="space-y-1">
               <label class="text-[10px] uppercase font-bold text-slate-400 tracking-widest ml-1">Márka / Típus</label>
               <select v-model="formData.type" class="w-full bg-slate-50 border-none rounded-2xl p-4 focus:ring-2 focus:ring-emerald-500/20 outline-none appearance-none">
+                <option value="" disabled>Válasszon egy márka típust</option>
                 <option v-for="brand in brands" :key="brand.id" :value="brand.id">{{ brand.label }}</option>
               </select>
             </div>
           </div>
         </div>
+
         <div class="mt-8 flex gap-3">
           <button @click="isOpen = false" class="flex-1 py-4 bg-slate-100 text-slate-600 rounded-2xl font-bold hover:bg-slate-200 transition-all">Mégse</button>
           <button @click="saveProduct" class="flex-1 py-4 bg-emerald-600 text-white rounded-2xl font-bold hover:bg-emerald-700 shadow-lg shadow-emerald-200 transition-all">Mentés</button>
@@ -144,17 +158,18 @@ const isOpen = ref(false);
 const isEditOpen = ref(false);
 const editingProduct = ref(null);
 const addAmount = ref(0);
+const isDeleting = ref(null);
 
 const formData = ref({
   name: '',
   stock: 0,
-  type: 1,
+  type: '',  // empty string so placeholder shows
   note: ''
 });
 
 const openEditModal = (item) => {
   editingProduct.value = { ...item };
-  addAmount.value = 0; // Alaphelyzetbe állítjuk a bevitelt
+  addAmount.value = 0;
   isEditOpen.value = true;
 };
 
@@ -162,13 +177,9 @@ const updateStock = async () => {
   try {
     await $fetch(`${config.public.apiBase}/api/products/${editingProduct.value.id}`, {
       method: 'PATCH',
-      body: {
-        // NEM a stock-ot küldjük, hanem csak a változást!
-        amount: Number(addAmount.value) 
-      },
+      body: { amount: Number(addAmount.value) },
       headers: { 'Accept': 'application/json' }
     });
-    
     await refresh(); 
     isEditOpen.value = false;
     editingProduct.value = null;
@@ -176,6 +187,23 @@ const updateStock = async () => {
   } catch (err) {
     console.error(err.data);
     alert('Hiba történt a mentés során.');
+  }
+};
+
+const deleteProduct = async (id) => {
+  if (!confirm('Biztosan törölni szeretnéd ezt a terméket?')) return;
+  isDeleting.value = id;
+  try {
+    await $fetch(`${config.public.apiBase}/api/products/${id}`, {
+      method: 'DELETE',
+      headers: { 'Accept': 'application/json' }
+    });
+    await refresh();
+  } catch (err) {
+    console.error(err.data);
+    alert('Hiba történt a törlés során.');
+  } finally {
+    isDeleting.value = null;
   }
 };
 
@@ -209,19 +237,16 @@ const saveProduct = async () => {
         name: formData.value.name,
         stock: Number(formData.value.stock),
         type: Number(formData.value.type),
-        unit: 'g' // Ezt hozzáadtuk, mert a backend/adatbázis várja
+        unit: 'g'
       },
       credentials: 'include',
-      headers: {
-        'Accept': 'application/json',
-      }
+      headers: { 'Accept': 'application/json' }
     });
-    
     refresh(); 
     isOpen.value = false;
-    formData.value = { name: '', stock: 0, type: 1 };
+    formData.value = { name: '', stock: 0, type: '' };
   } catch (err) {
-    console.error('Szerver válasza:', err.data); // Itt fogod látni, ha még mindig hiányzik valami
+    console.error('Szerver válasza:', err.data);
     alert('Hiba! ' + (err.data?.message || 'Ellenőrizd az adatokat!'));
   }
 };

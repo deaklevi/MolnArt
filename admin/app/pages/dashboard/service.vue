@@ -4,8 +4,6 @@ definePageMeta({ middleware: 'auth' })
 const config = useRuntimeConfig()
 const apiBase = config.public.apiBase
 
-// --- ADATOK LEKÉRÉSE (Csak kliens oldalon!) ---
-
 // 1. Összes szolgáltatás
 const { data: allServices, refresh: refreshAll, pending: servicesPending } = await useFetch(`${apiBase}/api/services`, {
   server: false,

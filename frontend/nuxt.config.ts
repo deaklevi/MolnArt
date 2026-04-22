@@ -6,8 +6,6 @@ export default defineNuxtConfig({
 
   runtimeConfig: {
     public: {
-      // Itt CSAK az alapértelmezett értéket add meg. 
-      // A Nuxt automatikusan keresni fogja a NUXT_PUBLIC_API_BASE-t a .env-ben!
       apiBase: 'http://localhost:8000'
     }
   },
