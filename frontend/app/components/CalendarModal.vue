@@ -58,9 +58,9 @@
             <div v-if="loading" class="grid grid-cols-3 gap-3">
               <div v-for="n in 9" :key="n" class="h-14 rounded-2xl bg-stone-100 animate-pulse" />
             </div>
-            <div v-else-if="slots.length > 0" class="grid grid-cols-3 gap-3">
+            <div v-else-if="filteredSlots.length > 0" class="grid grid-cols-3 gap-3">
               <button
-                v-for="slot in slots"
+                v-for="slot in filteredSlots"
                 :key="slot.start"
                 @click="confirmBooking(slot)"
                 class="py-4 rounded-2xl border text-sm font-bold transition-all bg-white border-stone-100 hover:border-purple-900 hover:text-purple-900 shadow-sm hover:shadow-md"
@@ -111,9 +111,9 @@
           <div v-if="loading" class="grid grid-cols-3 gap-3">
             <div v-for="n in 9" :key="n" class="h-12 rounded-xl bg-stone-100 animate-pulse" />
           </div>
-          <div v-else-if="slots.length > 0" class="grid grid-cols-3 gap-3">
+          <div v-else-if="filteredSlots.length > 0" class="grid grid-cols-3 gap-3">
             <button
-              v-for="slot in slots"
+              v-for="slot in filteredSlots"
               :key="slot.start"
               @click="confirmBooking(slot)"
               class="py-3 rounded-xl text-sm font-bold border border-stone-100 bg-stone-50 text-gray-700 active:scale-95"
@@ -138,6 +138,7 @@ const props = defineProps({
   pendingService: { type: Object,  default: null },
   workerName:     { type: String,  default: '' },
   workerId:       { type: Number,  required: true },
+  cartItems:      { type: Array,   default: () => [] }, // ← NEW: cart items to block
 })
 
 const emit = defineEmits(['close', 'confirm'])
@@ -146,6 +147,12 @@ const config          = useRuntimeConfig()
 const selectedDateObj = ref(new Date())
 const slots           = ref([])
 const loading         = ref(false)
+
+// Convert "HH:MM" or "HH:MM:SS" to total minutes
+const timeToMins = (t) => {
+  const [h, m] = t.split(':').map(Number)
+  return h * 60 + m
+}
 
 async function fetchSlots() {
   if (!props.workerId || !props.pendingService) return
@@ -172,8 +179,35 @@ async function fetchSlots() {
   }
 }
 
-watch(selectedDateObj,          () => { if (props.isOpen) fetchSlots() })
-watch(() => props.isOpen,       (open) => { if (open) fetchSlots() })
+const filteredSlots = computed(() => {
+  if (!props.pendingService) return slots.value
+
+  const duration   = Number(props.pendingService.time)
+  const dateString = selectedDateObj.value.toISOString().split('T')[0]
+
+  return slots.value.filter(slot => {
+    const slotStart = timeToMins(slot.start)
+    const slotEnd   = slotStart + duration
+
+    const blockedByCart = props.cartItems.some(cartItem => {
+      // Only check cart items on the same date
+      if (!cartItem.startTime.startsWith(dateString)) return false
+
+      // cartItem.startTime is "2025-04-22 10:00:00" — grab just the time part
+      const cartTimePart = cartItem.startTime.split(' ')[1]
+      const cartStart    = timeToMins(cartTimePart)
+      const cartEnd      = cartStart + Number(cartItem.time)
+
+      // Standard overlap check: A overlaps B if A.start < B.end AND A.end > B.start
+      return slotStart < cartEnd && slotEnd > cartStart
+    })
+
+    return !blockedByCart
+  })
+})
+
+watch(selectedDateObj,            () => { if (props.isOpen) fetchSlots() })
+watch(() => props.isOpen,         (open) => { if (open) fetchSlots() })
 watch(() => props.pendingService, () => { if (props.isOpen) fetchSlots() })
 
 const isSameDay = (d1, d2) => d1.toDateString() === d2.toDateString()

@@ -157,6 +157,7 @@
       :pending-service="pendingService"
       :worker-name="selectedWorker?.user_name"
       :worker-id="selectedWorker?.id"
+      :cart-items="cart"
       @close="isCalendarOpen = false"
       @confirm="handleAddToCart" 
     />
@@ -166,13 +167,11 @@
 <script setup>
 import { ref, watch, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-// index.vue - script setup
-import { useAppointmentStore } from '~/stores/appointmentStore'; // Importáld a store-t
+import { useAppointmentStore } from '~/stores/appointmentStore';
 const appointmentStore = useAppointmentStore();
 
 // index.vue - a submitReservation függvényben
 const submitReservation = async () => {
-  // Opcionálisan itt ellenőrizheted a telefonszámot is, ha kötelező
   if (!customerData.value.name || !customerData.value.email) {
     alert('Kérlek töltsd ki a neved és az emailed!');
     return;
@@ -187,7 +186,7 @@ const submitReservation = async () => {
         user_id: selectedWorker.value.id,
         name: customerData.value.name,
         email: customerData.value.email,
-        phone_number: customerData.value.phone_number // <--- Itt a javítás
+        phone_number: customerData.value.phone_number
       };
 
       await appointmentStore.saveAppointment(payload, true);
@@ -210,9 +209,7 @@ const selectedWorker = ref(null);
 
 const totalSum = computed(() => cart.value.reduce((total, i) => total + Number(i.price || 0), 0));
 
-// Új state-ek
 const isReservationModalOpen = ref(false);
-// index.vue - a script részben
 const customerData = ref({ 
   name: '', 
   email: '', 
