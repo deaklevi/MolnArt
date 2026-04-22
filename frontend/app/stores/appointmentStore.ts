@@ -69,16 +69,12 @@ export const useAppointmentStore = defineStore('appointment', () => {
     await fetchAppointments()
   }
 
-  async function saveAppointment(formData: AppointmentForm, isNewBooking: boolean, id?: number | string) {
-    const url = isNewBooking
-      ? `${baseUrl}/api/appointments`
-      : `${baseUrl}/api/appointments/${id}`
 
+  async function saveAppointment(formData: AppointmentForm, isNewBooking: boolean, id?: number | string) {
+    const url = isNewBooking ? `${baseUrl}/api/appointments` : `${baseUrl}/api/appointments/${id}`
     const method = isNewBooking ? 'POST' : 'PUT'
 
-    await $fetch(`${baseUrl}/sanctum/csrf-cookie`, {
-      credentials: 'include'
-    })
+    await $fetch(`${baseUrl}/sanctum/csrf-cookie`, { credentials: 'include' })
 
     await $fetch(url, {
       method,
@@ -89,13 +85,12 @@ export const useAppointmentStore = defineStore('appointment', () => {
       },
       body: {
         ...formData,
-        customer_id: formData.customer_id ?? 1, 
-        user_id: 1,
-        appointment_from: toBackendFormat(formData.appointment_from),
-        appointment_to: toBackendFormat(formData.appointment_to),
+        customer_id: formData.customer_id ?? null, // Ha nincs, null
+        user_id: formData.user_id, // ITT HASZNÁLJUK A DINAMIKUS ID-T
+        appointment_from: formData.appointment_from, // A formatálást az index.vue-ban végezzük el
+        appointment_to: formData.appointment_to,
       }
     })
-    await fetchAppointments()
   }
 
   async function deleteAppointment(id: number) {
