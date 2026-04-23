@@ -12,10 +12,10 @@ import type {
 } from '@fullcalendar/core'
 import type { EventResizeDoneArg } from '@fullcalendar/interaction'
 
-
 import { useAppointmentStore, type AppointmentForm } from '@/stores/appointmentStore'
 import { useBreakStore } from '@/stores/breakStore'
 import { useScheduleStore } from '@/stores/scheduleStore'
+import { ref, reactive, computed, watch, onMounted, onBeforeUnmount } from 'vue'
 
 const config = useRuntimeConfig()
 const baseUrl = config.public.apiBase
@@ -26,24 +26,55 @@ const breakStore = useBreakStore()
 const scheduleStore = useScheduleStore()
 const { appointments, isLoading } = storeToRefs(appointmentStore)
 
-const showModal    = ref(false)
+const showModal = ref(false)
 const selectedAppt = ref<any>(null)
 const isNewBooking = ref(false)
-const selectedIds  = ref<number[]>([])
-const isMobile     = ref(false)
+const selectedIds = ref<number[]>([])
+const isMobile = ref(false)
 
-const checkView = () => {
+const calendarOptions = reactive<CalendarOptions>({
+  plugins: [timeGridPlugin, dayGridPlugin, interactionPlugin],
+  initialView: window.innerWidth < 768 ? 'timeGridDay' : 'timeGridWeek',
+  firstDay: 1,
+  editable: true,
+  selectable: true,
+  nowIndicator: true,
+  selectMirror: true,
+  slotMinTime: '07:00:00',
+  slotMaxTime: '21:30:00',
+  allDaySlot: false,
+  height: '85%',
+  locale: 'hu',
+  timeZone: 'UTC',
+  slotDuration: '00:30:00',
+  slotLabelInterval: '00:30:00',
+  snapDuration: '00:05:00',
+  contentHeight: 'auto',
+  expandRows: true,
+  longPressDelay: 300,
+  eventLongPressDelay: 300,
+  selectLongPressDelay: 300,
+  eventStartEditable: true,
+  eventDurationEditable: true,
+  eventClick: handleEventClick,
+  eventDrop: handleEventDrop,
+  eventResize: handleEventResize,
+  select: handleSlotSelect,
+  slotLabelFormat: { hour: '2-digit', minute: '2-digit', hour12: false },
+  eventTimeFormat: { hour: '2-digit', minute: '2-digit', hour12: false },
+  dayHeaderFormat: { month: '2-digit', day: '2-digit', omitCommas: true },
+  buttonText: { today: "Ma", week: "Hét", day: "Nap" },
+})
+
+const updateResponsiveUI = () => {
   isMobile.value = window.innerWidth < 768
+  calendarOptions.headerToolbar = isMobile.value
+    ? { left: 'prev,next today', center: 'title', right: 'timeGridDay,timeGridWeek' }
+    : { left: 'prev,next today', center: 'title', right: 'timeGridWeek,timeGridDay' }
 
-  const api = calendarRef.value?.getApi?.()
-  if (!api) return
-
-  const currentView = api.view.type
-  const targetView = isMobile.value ? 'timeGridDay' : 'timeGridWeek'
-
-  if (currentView !== targetView) {
-    api.changeView(targetView)
-  }
+  calendarOptions.titleFormat = isMobile.value 
+    ? { month: 'short', day: 'numeric' } 
+    : { year: 'numeric', month: 'long', day: 'numeric' }
 }
 
 const { data: user } = await useFetch(`${baseUrl}/api/user`, {
@@ -58,11 +89,10 @@ watch(user as any, (newUser: any) => {
   }
 }, { immediate: true })
 
-// ── FETCH SERVICES ────────────────────────────────────
 const { data: allServices } = await useFetch(`${baseUrl}/api/services`, {
   server: false,
   lazy: true,
-  transform: (res:any) => res.data || res
+  transform: (res: any) => res.data || res
 })
 
 const userServices = computed(() => {
@@ -72,26 +102,19 @@ const userServices = computed(() => {
   )
 })
 
-
 async function loadAppointments() {
   await appointmentStore.fetchAppointments()
-  nextTick(() =>{
-    checkView()
-  })
 }
 
-
 const calendarEvents = computed(() => {
-  console.log('Naptár adatok a store-ból:', appointments.value)
   const normalAppointments = appointmentStore.appointments.map((app: any) => ({
     id: app.id,
-    title: app.service,
+    title: `${app.customer.name} `,
     start: app.appointment_from,
     end: app.appointment_to,
     extendedProps: { raw: JSON.parse(JSON.stringify(app)) },
   }))
 
- 
   const backgroundBreaks = breakStore.breaks.map((b: any) => ({
     start: `${b.date}T${b.start}`,
     end: `${b.date}T${b.end}`,
@@ -99,11 +122,9 @@ const calendarEvents = computed(() => {
     color: '#ef4444' 
   }))
 
-
   const workingHours = (scheduleStore.schedule || []).map((wh: any) => ({
     start: `${wh.date}T${wh.start}`,
     end: `${wh.date}T${wh.end}`,
-    
     display: 'background',
     color: 'lightgreen', 
   }))
@@ -111,84 +132,9 @@ const calendarEvents = computed(() => {
   return [...workingHours, ...backgroundBreaks, ...normalAppointments]
 })
 
-
-
-const calendarOptions = computed<CalendarOptions>(() => ({
-  plugins: [timeGridPlugin, dayGridPlugin, interactionPlugin],
-  initialView: 'timeGridWeek',
-
-  headerToolbar: isMobile.value
-  ?{
-    left: 'prev,next,today',
-    center:'title',
-    right: 'timeGridDay,timeGridWeek',
-  } 
-  :{
-    left: 'prev,next today',
-    center: 'title',
-    right: isMobile.value ? 'timeGridDay' : 'timeGridWeek,timeGridDay',
-  },
-
-  firstDay:1,
-  editable: true,
-  selectable: true,
-  nowIndicator: true,
-  selectMirror: true,
-  events: calendarEvents.value,
-  slotMinTime: '07:00:00',
-  slotMaxTime: '21:30:00',
-  allDaySlot: false,
-  height: '85%',
-
-  eventClick: handleEventClick,
-  eventDrop: handleEventDrop,
-  eventResize: handleEventResize,
-  select: handleSlotSelect,
-  
-  slotLabelFormat: {
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: false,
-  },
-
-  eventTimeFormat: {
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: false,
-  },
-
-  dayHeaderFormat: {
-    month: '2-digit',
-    day: '2-digit',
-    omitCommas: true,
-  },
-
-  locale: 'hu',
-  timeZone: 'UTC',
-  slotDuration: '00:30:00',
-  slotLabelInterval: '00:30:00',
-  snapDuration: '00:05:00',
-  contentHeight: 'auto',
-  expandRows: true,
-
-  longPressDelay: 300,
-  eventLongPressDelay: 300,
-  selectLongPressDelay: 300,
-  eventStartEditable: true,
-  eventDurationEditable: true,
-
-  titleFormat: isMobile.value 
-  ? {month:'short', day:'numeric'} 
-  : { year: 'numeric', month: 'long', day: 'numeric' },
-
-  buttonText:{
-    today:"Ma",
-    week:"Hét",
-    day:"Nap"
-  },
-  
-
-}))
+watch(calendarEvents, (newEvents) => {
+  calendarOptions.events = newEvents
+}, { immediate: true })
 
 function handleEventClick(info: EventClickArg) {
   selectedAppt.value = {
@@ -222,54 +168,47 @@ async function handleEventDrop(info: EventDropArg) {
   await updateTime(info.event.id, info.event.startStr, info.event.endStr, info.revert)
 }
 
-
 async function handleEventResize(info: EventResizeDoneArg) {
   await updateTime(info.event.id, info.event.startStr, info.event.endStr, info.revert)
 }
 
-
 async function handleSave(formData: AppointmentForm) {
-  await appointmentStore.saveAppointment(
-    formData,
-    isNewBooking.value,
-    selectedAppt.value?.id
-  )
+  await appointmentStore.saveAppointment(formData, isNewBooking.value, selectedAppt.value?.id)
   showModal.value = false
 }
-
 
 async function handleDelete(id: number) {
   await appointmentStore.deleteAppointment(id)
   showModal.value = false
 }
 
-onMounted(async() => {
-  nextTick(() => {
-    checkView()
-  })
-  window.addEventListener('resize', checkView)
+onMounted(async () => {
+  updateResponsiveUI()
+  window.addEventListener('resize', updateResponsiveUI)
   loadAppointments()
   breakStore.fetchBreaks()
   await scheduleStore.fetchSchedule()
-  console.log(scheduleStore.schedule)
 })
 
 onBeforeUnmount(() => {
-  window.removeEventListener('resize', checkView)
+  window.removeEventListener('resize', updateResponsiveUI)
 })
 </script>
 
 <template>
-  <div class="p-6 h-screen flex flex-col">
-    <div v-if="isLoading" class="text-center py-20 text-gray-400">
+  <div class="p-6 h-screen flex flex-col relative">
+    
+    <div 
+      v-if="isLoading" 
+      class="absolute inset-0 z-50 flex items-center justify-center bg-white/60 text-gray-500 rounded-md backdrop-blur-sm"
+    >
       Loading appointments...
     </div>
 
-    <ClientOnly v-else class="flex-1">
+    <ClientOnly class="flex-1">
       <FullCalendar 
         ref="calendarRef" 
         :options="calendarOptions" 
-        :events="calendarEvents" 
         class="h-full" 
       />
     </ClientOnly>
@@ -285,4 +224,3 @@ onBeforeUnmount(() => {
     />
   </div>
 </template>
-

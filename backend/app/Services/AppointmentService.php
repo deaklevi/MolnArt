@@ -96,7 +96,6 @@ class AppointmentService
 
     private function syncProducts(Appointment $appointment, array $incomingProducts): void
     {
-        // Key current pivot by product_id for easy lookup
         $current = $appointment->products()
             ->withPivot('quantity')
             ->get()
@@ -104,19 +103,16 @@ class AppointmentService
     
         $incoming = collect($incomingProducts)->keyBy('product_id');
     
-        // 1. Restore stock for removed products
         foreach ($current as $productId => $product) {
             if (!$incoming->has($productId)) {
                 $product->increment('stock', $product->pivot->quantity);
             }
         }
     
-        // 2. Adjust stock for added or changed products
         foreach ($incoming as $productId => $item) {
             $product = Product::lockForUpdate()->findOrFail($productId);
     
             if ($current->has($productId)) {
-                // Already existed — only adjust the diff
                 $diff = $item['quantity'] - $current[$productId]->pivot->quantity;
     
                 if ($diff > 0 && $product->stock < $diff) {
@@ -124,11 +120,9 @@ class AppointmentService
                 }
     
                 if ($diff !== 0) {
-                    // decrement handles negative too (restores if diff < 0)
                     $product->decrement('stock', $diff);
                 }
             } else {
-                // Brand new product on this appointment
                 if ($product->stock < $item['quantity']) {
                     throw new \RuntimeException("Out of stock: {$product->name}");
                 }
@@ -136,8 +130,6 @@ class AppointmentService
                 $product->decrement('stock', $item['quantity']);
             }
         }
-    
-        // 3. Sync pivot — now stock is already correct
         $syncData = $incoming
             ->mapWithKeys(fn($item, $id) => [
                 $id => ['quantity' => $item['quantity']]

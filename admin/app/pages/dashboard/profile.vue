@@ -89,13 +89,15 @@ const updateProfile = async () => {
 <template>
   <div class="min-h-screen bg-slate-50 p-4 md:p-8 font-sans">
     <div class="max-w-2xl mx-auto">
-      
-      <NuxtLink to="/dashboard" class="group text-slate-500 flex items-center gap-2 mb-6 hover:text-indigo-600 transition-colors">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 transition-transform group-hover:-translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-        </svg>
-        Vissza a vezérlőpultra
-      </NuxtLink>
+      <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+        <div>
+          <h1 class="text-3xl font-black text-slate-900 tracking-tight">Profilom</h1>
+          <p class="text-slate-500 font-medium">Változtasd profil adataid </p>
+        </div>
+        <NuxtLink to="/dashboard" class="px-5 py-2.5 bg-white border border-slate-200   text-slate-600 rounded-xl text-sm font-bold hover:bg-slate-50 transition-all shadow-sm">
+          ← Irányítópult
+        </NuxtLink>
+      </div>
 
       <ClientOnly>
         <div class="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
@@ -106,11 +108,6 @@ const updateProfile = async () => {
           </div>
 
           <template v-else>
-            <div class="p-8 border-b border-slate-100 bg-indigo-50/30">
-              <h1 class="text-2xl font-bold text-slate-900">Profil szerkesztése</h1>
-              <p class="text-slate-500">Módosítsd a nyilvános adataidat.</p>
-            </div>
-
             <form @submit.prevent="updateProfile" class="p-8 space-y-6">
               <div class="flex flex-col items-center gap-4 py-4">
                 <div class="relative group">
@@ -147,7 +144,7 @@ const updateProfile = async () => {
               <button 
                 type="submit" 
                 :disabled="loading" 
-                class="w-full py-4 bg-indigo-600 text-white font-bold rounded-2xl hover:bg-indigo-700 transition-all shadow-lg active:scale-[0.98] disabled:opacity-50"
+                class="w-full py-4 bg-[#36082A] text-white font-bold rounded-2xl hover:bg-[#62104D] transition-all shadow-lg active:scale-[0.98] disabled:opacity-50"
               >
                 {{ loading ? 'Mentés folyamatban...' : 'Módosítások mentése' }}
               </button>
