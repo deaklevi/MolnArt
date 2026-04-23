@@ -1,17 +1,21 @@
-<script setup>
+<script setup >
+import { useServiceStore } from '@/stores/servicesStore'
+
+import { storeToRefs } from 'pinia'
+
 definePageMeta({ middleware: 'auth' })
 
 const config = useRuntimeConfig()
 const apiBase = config.public.apiBase
+const serviceStore = useServiceStore()
 
-// 1. Összes szolgáltatás
-const { data: allServices, refresh: refreshAll, pending: servicesPending } = await useFetch(`${apiBase}/api/services`, {
-  server: false,
-  lazy: true,
-  transform: (response) => response.data || response 
+const { services: allServices } = storeToRefs(serviceStore)
+
+onMounted(() => {
+  serviceStore.fetchServices()
 })
 
-// 2. Bejelentkezett felhasználó
+
 const { data: user, pending: userPending } = await useFetch(`${apiBase}/api/user`, { 
   key: 'user_services_view',
   credentials: 'include',
@@ -19,16 +23,14 @@ const { data: user, pending: userPending } = await useFetch(`${apiBase}/api/user
   lazy: true
 })
 
-// --- ÁLLAPOTOK ---
 const selectedIds = ref([]) 
 const isSaving = ref(false)
 const isCreating = ref(false)
 const statusMessage = ref({ text: '', type: '' })
 
-// 3. SZINKRONIZÁCIÓ: Megvárjuk, amíg a user megérkezik (F5 után is)
+
 watch(user, (newUser) => {
   if (newUser?.services) {
-    // Kicsomagoljuk a már meglévő szolgáltatásai ID-it
     selectedIds.value = newUser.services.map(s => s.id)
   }
 }, { immediate: true })
@@ -39,7 +41,6 @@ const getCsrfToken = () => {
   return match ? decodeURIComponent(match[2]) : null;
 }
 
-// PIPÁLÁS LOGIKA
 const toggleLocalService = (id) => {
   const index = selectedIds.value.indexOf(id)
   if (index === -1) {
@@ -49,7 +50,6 @@ const toggleLocalService = (id) => {
   }
 }
 
-// MENTÉS
 const saveChanges = async () => {
   isSaving.value = true
   statusMessage.value = { text: '', type: '' }
@@ -73,23 +73,15 @@ const saveChanges = async () => {
   }
 }
 
-// ÚJ SZOLGÁLTATÁS
 const newService = ref({ name: '', time: 30 })
+
 const createService = async () => {
   isCreating.value = true
   try {
-    await $fetch(`${apiBase}/api/services`, {
-      method: 'POST',
-      body: newService.value,
-      credentials: 'include',
-      headers: { 
-        'Accept': 'application/json',
-        'X-XSRF-TOKEN': getCsrfToken() 
-      }
-    })
+    await serviceStore.createService(newService.value)
     newService.value = { name: '', time: 30 }
     statusMessage.value = { text: 'Új szolgáltatás létrehozva!', type: 'success' }
-    await refreshAll() // Frissítjük a globális listát
+    setTimeout(() => statusMessage.value.text = '', 4000)
   } catch (e) {
     alert("Hiba a létrehozáskor!")
   } finally {
@@ -102,7 +94,6 @@ const createService = async () => {
   <div class="max-w-4xl mx-auto p-6 font-sans">
     
     <ClientOnly>
-      
       <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4">
         <div>
           <h1 class="text-3xl font-black text-slate-900 tracking-tight">Szolgáltatásaim</h1>
@@ -113,7 +104,7 @@ const createService = async () => {
         </NuxtLink>
       </div>
 
-      <div v-if="userPending || servicesPending" class="flex flex-col items-center justify-center py-20 gap-4">
+      <div v-if="userPending" class="flex flex-col items-center justify-center py-20 gap-4">
         <div class="w-10 h-10 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
         <p class="text-slate-400 font-bold animate-pulse">Szolgáltatások betöltése...</p>
       </div>
@@ -185,7 +176,6 @@ const createService = async () => {
           <div class="w-10 h-10 border-4 border-slate-100 border-t-indigo-600 rounded-full animate-spin"></div>
         </div>
       </template>
-
     </ClientOnly>
   </div>
 </template>
