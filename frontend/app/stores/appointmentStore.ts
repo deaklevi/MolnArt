@@ -85,9 +85,9 @@ export const useAppointmentStore = defineStore('appointment', () => {
       },
       body: {
         ...formData,
-        customer_id: formData.customer_id ?? null, // Ha nincs, null
-        user_id: formData.user_id, // ITT HASZNÁLJUK A DINAMIKUS ID-T
-        appointment_from: formData.appointment_from, // A formatálást az index.vue-ban végezzük el
+        customer_id: formData.customer_id ?? null,
+        user_id: formData.user_id,
+        appointment_from: formData.appointment_from, 
         appointment_to: formData.appointment_to,
       }
     })

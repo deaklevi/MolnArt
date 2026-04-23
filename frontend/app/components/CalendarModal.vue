@@ -1,10 +1,6 @@
 <template>
   <Transition name="fade">
-    <div
-      v-if="isOpen"
-      class="fixed inset-0 z-[110] flex items-end md:items-center justify-center p-0 md:p-4 bg-stone-900/60 backdrop-blur-md"
-      @click.self="$emit('close')"
-    >
+    <div v-if="isOpen" class="fixed inset-0 z-[110] flex items-end md:items-center justify-center p-0 md:p-4 bg-stone-900/60 backdrop-blur-md"@click.self="$emit('close')">
       <!-- ── DESKTOP ── -->
       <div class="hidden md:flex bg-white w-full max-w-5xl rounded-[40px] shadow-2xl overflow-hidden h-[700px] relative">
         <button @click="$emit('close')" class="absolute top-6 right-6 z-20 text-stone-300 hover:text-stone-900 transition-colors">
@@ -18,31 +14,36 @@
             Időpont kiválasztása
           </h3>
           <div class="flex justify-between items-center mb-6 px-2">
-  <button @click="prevMonth" class="p-2 hover:bg-stone-100 rounded-full transition-colors">
-    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
-  </button>
-  <span class="font-serif text-lg capitalize">{{ currentMonthDisplay }}</span>
-  <button @click="nextMonth" class="p-2 hover:bg-stone-100 rounded-full transition-colors">
-    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
-  </button>
-</div>
+            <button @click="prevMonth" class="p-2 hover:bg-stone-100 rounded-full transition-colors">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
+            </button>
+            <div class="flex items-center gap-4">
+              <button @click="goToToday" class="text-[10px] font-bold uppercase tracking-widest px-3 py-1 bg-white border border-stone-200 rounded-full hover:bg-stone-100 transition-colors">
+                Ma
+              </button>
+              <span class="font-serif text-lg capitalize">{{ currentMonthDisplay }}</span>
+            </div>
+            <button @click="nextMonth" class="p-2 hover:bg-stone-100 rounded-full transition-colors">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+            </button>
+          </div>
 
-<div class="grid grid-cols-7 gap-2 mb-8">
-  <div v-for="(day, index) in daysInMonth" :key="index">
-    <div 
-      v-if="day"
-      @click="selectedDateObj = day.fullDate"
-      :class="[
-        'aspect-square flex items-center justify-center text-sm rounded-full cursor-pointer transition-all',
-        isSameDay(selectedDateObj, day.fullDate)
-          ? 'bg-purple-900 text-white font-bold shadow-lg'
-          : 'hover:bg-purple-100 text-stone-600'
-      ]"
-    >
-      {{ day.dayNumber }}
-    </div>
-  </div>
-</div>
+          <div class="grid grid-cols-7 gap-2 mb-8">
+            <div v-for="(day, index) in daysInMonth" :key="index">
+              <div 
+                v-if="day"
+                @click="selectedDateObj = day.fullDate"
+                :class="[
+                  'aspect-square flex items-center justify-center text-sm rounded-full cursor-pointer transition-all',
+                  isSameDay(selectedDateObj, day.fullDate)
+                    ? 'bg-purple-900 text-white font-bold shadow-lg'
+                    : 'hover:bg-purple-100 text-stone-600'
+                ]"
+              >
+                {{ day.dayNumber }}
+              </div>
+            </div>
+          </div>
 
           <div class="mt-auto bg-white p-6 rounded-[2rem] border border-stone-200 shadow-sm">
             <p class="text-[9px] font-black uppercase text-purple-900 mb-1 tracking-widest">Kiválasztott munka</p>
@@ -64,12 +65,7 @@
               <div v-for="n in 9" :key="n" class="h-14 rounded-2xl bg-stone-100 animate-pulse" />
             </div>
             <div v-else-if="filteredSlots.length > 0" class="grid grid-cols-3 gap-3">
-              <button
-                v-for="slot in filteredSlots"
-                :key="slot.start"
-                @click="confirmBooking(slot)"
-                class="py-4 rounded-2xl border text-sm font-bold transition-all bg-white border-stone-100 hover:border-purple-900 hover:text-purple-900 shadow-sm hover:shadow-md"
-              >
+              <button v-for="slot in filteredSlots" :key="slot.start" @click="confirmBooking(slot)" class="py-4 rounded-2xl border text-sm font-bold transition-all bg-white border-stone-100 hover:border-purple-900 hover:text-purple-900 shadow-sm hover:shadow-md">
                 {{ slot.start }}
               </button>
             </div>
@@ -81,53 +77,56 @@
       </div>
 
       <!-- ── MOBILE ── -->
-      <div class="flex md:hidden bg-white w-full rounded-t-[2.5rem] shadow-2xl flex-col max-h-[90vh] overflow-hidden animate-slide-up">
-        <div class="p-6 border-b border-stone-100 flex justify-between items-center bg-stone-50/50">
-          <div>
-            <h3 class="text-xl font-serif text-gray-900">{{ pendingService?.name }}</h3>
-            <p class="text-xs text-purple-700 font-bold uppercase tracking-widest mt-1">
-              {{ workerName }} • {{ pendingService?.time }} perc
-            </p>
+      <div class="flex md:hidden bg-white w-full shadow-2xl flex-col h-screen overflow-hidden animate-slide-up">
+        <div class="p-6 pb-2">
+          <div class="flex justify-between items-center mb-4">
+            <div>
+              <h3 class="text-xl font-serif text-gray-900">{{ pendingService?.name }}</h3>
+              <p class="text-xs text-purple-700 font-bold uppercase tracking-widest mt-1">
+                {{ workerName }}
+              </p>
+            </div>
+            <button @click="$emit('close')" class="p-2 bg-stone-100 rounded-full">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
           </div>
-          <button @click="$emit('close')" class="p-2 bg-stone-200/50 rounded-full">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
+
+          <div class="flex justify-between items-center bg-stone-50 rounded-xl p-2">
+            <button @click="prevMonth" class="p-2 hover:bg-white rounded-lg transition-colors">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
+            </button>
+            <button @click="goToToday" class="text-[10px] font-black uppercase text-purple-900">
+              Ma
+            </button>
+            <span class="font-serif text-md capitalize font-bold text-gray-900">{{ currentMonthDisplay }}</span>
+            <button @click="nextMonth" class="p-2 hover:bg-white rounded-lg transition-colors">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+            </button>
+          </div>
         </div>
 
-        <div class="flex gap-3 overflow-x-auto p-6 no-scrollbar border-b border-stone-50">
-          <div
-            v-for="date in mobileDates"
-            :key="date.full"
-            @click="selectedDateObj = new Date(date.full)"
-            class="flex-shrink-0 w-16 h-20 flex flex-col items-center justify-center rounded-2xl cursor-pointer transition-all border-2"
-            :class="isSameDay(selectedDateObj, new Date(date.full))
-              ? 'bg-purple-900 border-purple-900 text-white shadow-lg'
-              : 'bg-white border-stone-100 text-stone-500'"
-          >
-            <span class="text-[10px] uppercase font-bold">{{ date.dayName }}</span>
-            <span class="text-lg font-serif">{{ date.day }}</span>
+        <div class="flex gap-2 overflow-x-auto p-4 no-scrollbar border-b border-stone-50">
+          <div v-for="(day, index) in daysInMonth.filter(d => d !== null)" :key="index" @click="selectedDateObj = day.fullDate" class="flex-shrink-0 w-16 h-20 flex flex-col items-center justify-center rounded-2xl cursor-pointer transition-all border-2" :class="[isSameDay(selectedDateObj, day.fullDate) ? 'bg-purple-900 border-purple-900 text-white shadow-lg' : 'bg-white border-stone-100 text-stone-500']">
+            <span class="text-[10px] uppercase font-bold">
+              {{ day.fullDate.toLocaleDateString('hu-HU', { weekday: 'short' }) }}
+            </span>
+            <span class="text-lg font-serif">{{ day.dayNumber }}</span>
           </div>
         </div>
 
-        <!-- Mobile slots -->
         <div class="flex-1 overflow-y-auto p-6 bg-white">
-          <div v-if="loading" class="grid grid-cols-3 gap-3">
-            <div v-for="n in 9" :key="n" class="h-12 rounded-xl bg-stone-100 animate-pulse" />
+          <div v-if="loading" class="grid grid-col-1 gap-3">
+            <div v-for="n in 6" :key="n" class="h-12 rounded-xl bg-stone-100 animate-pulse" />
           </div>
-          <div v-else-if="filteredSlots.length > 0" class="grid grid-cols-3 gap-3">
-            <button
-              v-for="slot in filteredSlots"
-              :key="slot.start"
-              @click="confirmBooking(slot)"
-              class="py-3 rounded-xl text-sm font-bold border border-stone-100 bg-stone-50 text-gray-700 active:scale-95"
-            >
+          <div v-else-if="filteredSlots.length > 0" class="grid grid-cols-1 gap-3">
+            <button v-for="slot in filteredSlots" :key="slot.start" @click="confirmBooking(slot)" class="py-3 rounded-xl text-sm font-bold border border-stone-100 bg-stone-50 text-gray-700 active:scale-95 hover:border-purple-900 transition-all">
               {{ slot.start }}
             </button>
           </div>
           <div v-else class="text-center py-10 opacity-40 italic font-serif">
-            Nincs szabad időpont.
+            Nincs szabad időpont erre a napra.
           </div>
         </div>
       </div>
@@ -138,22 +137,26 @@
 <script setup>
 import { ref, computed, watch } from 'vue'
 
+const goToToday = () => {
+  const today = new Date()
+  currentViewDate.value = new Date(today.getFullYear(), today.getMonth(), 1)
+  selectedDateObj.value = today
+}
 const props = defineProps({
-  isOpen:         { type: Boolean, required: true },
+  isOpen: { type: Boolean, required: true },
   pendingService: { type: Object,  default: null },
-  workerName:     { type: String,  default: '' },
-  workerId:       { type: Number,  required: true },
-  cartItems:      { type: Array,   default: () => [] }, // ← NEW: cart items to block
+  workerName: { type: String,  default: '' },
+  workerId: { type: Number,  required: true },
+  cartItems: { type: Array,   default: () => [] },
 })
 
 const emit = defineEmits(['close', 'confirm'])
 
-const config          = useRuntimeConfig()
+const config = useRuntimeConfig()
 const selectedDateObj = ref(new Date())
-const slots           = ref([])
-const loading         = ref(false)
+const slots = ref([])
+const loading = ref(false)
 
-// Convert "HH:MM" or "HH:MM:SS" to total minutes
 const timeToMins = (t) => {
   const [h, m] = t.split(':').map(Number)
   return h * 60 + m
@@ -161,12 +164,9 @@ const timeToMins = (t) => {
 
 async function fetchSlots() {
   if (!props.workerId || !props.pendingService) return
-
   const date = selectedDateObj.value.toISOString().split('T')[0]
-
   loading.value = true
-  slots.value   = []
-
+  slots.value = []
   try {
     const res = await $fetch(`${config.public.apiBase}/api/appointments/slots`, {
       headers: { Accept: 'application/json' },
@@ -186,44 +186,34 @@ async function fetchSlots() {
 
 const filteredSlots = computed(() => {
   if (!props.pendingService) return slots.value
-
   const duration   = Number(props.pendingService.time)
   const dateString = selectedDateObj.value.toISOString().split('T')[0]
-
   return slots.value.filter(slot => {
     const slotStart = timeToMins(slot.start)
     const slotEnd   = slotStart + duration
-
     const blockedByCart = props.cartItems.some(cartItem => {
-      // Only check cart items on the same date
       if (!cartItem.startTime.startsWith(dateString)) return false
-
-      // cartItem.startTime is "2025-04-22 10:00:00" — grab just the time part
       const cartTimePart = cartItem.startTime.split(' ')[1]
-      const cartStart    = timeToMins(cartTimePart)
-      const cartEnd      = cartStart + Number(cartItem.time)
-
-      // Standard overlap check: A overlaps B if A.start < B.end AND A.end > B.start
+      const cartStart = timeToMins(cartTimePart)
+      const cartEnd = cartStart + Number(cartItem.time)
       return slotStart < cartEnd && slotEnd > cartStart
     })
-
     return !blockedByCart
   })
 })
 
-watch(selectedDateObj,            () => { if (props.isOpen) fetchSlots() })
-watch(() => props.isOpen,         (open) => { if (open) fetchSlots() })
-watch(() => props.pendingService, () => { if (props.isOpen) fetchSlots() })
+watch(selectedDateObj,() => { if (props.isOpen) fetchSlots() })
+watch(() => props.isOpen,(open) => { if (open) fetchSlots() },{ immediate: true })
+watch(() => props.pendingService,() => { if (props.isOpen) fetchSlots() })
 
 const isSameDay = (d1, d2) => d1.toDateString() === d2.toDateString()
 
 const weekDays = computed(() => {
   const days = []
   const start = new Date()
-  // A hétfőre igazítás marad
   start.setDate(start.getDate() - start.getDay() + (start.getDay() === 0 ? -6 : 1))
   
-  // ITT VÁLTOZTASD MEG A SZÁMOT 90-RE (kb. 3 hónap)
+
   for (let i = 0; i < 90; i++) { 
     const d = new Date(start)
     d.setDate(d.getDate() + i)
@@ -238,8 +228,7 @@ const weekDays = computed(() => {
 
 const mobileDates = computed(() => {
   const daysShort = ['Vas', 'Hét', 'Ked', 'Sze', 'Csü', 'Pén', 'Szo']
-  
-  // ITT VÁLTOZTASD MEG A HOSSZT, pl. 60-ra
+
   return Array.from({ length: 60 }, (_, i) => {
     const d = new Date()
     d.setDate(d.getDate() + i)
@@ -257,41 +246,38 @@ const formatDateLabel = (d) =>
 function confirmBooking(slot) {
   const datePart = selectedDateObj.value.toISOString().split('T')[0]
   emit('confirm', {
-    name:      props.pendingService.name,
-    time:      props.pendingService.time,
-    price:     props.pendingService.price,
+    name: props.pendingService.name,
+    time: props.pendingService.time,
+    price: props.pendingService.price,
     startTime: `${datePart} ${slot.start}:00`,
-    endTime:   `${datePart} ${slot.end}:00`,
+    endTime: `${datePart} ${slot.end}:00`,
   })
 }
 
 
-// A script setup részben:
 const currentViewDate = ref(new Date())
 
 const prevMonth = () => {
   currentViewDate.value = new Date(currentViewDate.value.getFullYear(), currentViewDate.value.getMonth() - 1, 1)
+  selectedDateObj.value = new Date(currentViewDate.value)
 }
 
 const nextMonth = () => {
   currentViewDate.value = new Date(currentViewDate.value.getFullYear(), currentViewDate.value.getMonth() + 1, 1)
+  selectedDateObj.value = new Date(currentViewDate.value)
 }
 
-// Havi napok generálása (üres mezőkkel az elején, hogy jó helyre kerüljön a 1. nap)
 const daysInMonth = computed(() => {
   const year = currentViewDate.value.getFullYear()
   const month = currentViewDate.value.getMonth()
-  
   const firstDay = new Date(year, month, 1).getDay()
-  const padding = (firstDay === 0 ? 6 : firstDay - 1) // Hétfő kezdéshez igazítás
+  const padding = (firstDay === 0 ? 6 : firstDay - 1)
   
   const days = []
-  // Üres mezők az 1. nap előtt
   for (let i = 0; i < padding; i++) {
     days.push(null)
   }
-  
-  // Napok hozzáadása
+
   const daysInMonthCount = new Date(year, month + 1, 0).getDate()
   for (let i = 1; i <= daysInMonthCount; i++) {
     const d = new Date(year, month, i)
@@ -304,7 +290,6 @@ const daysInMonth = computed(() => {
   return days
 })
 
-// A currentMonthDisplay-t is frissíteni kell:
 const currentMonthDisplay = computed(() =>
   currentViewDate.value.toLocaleDateString('hu-HU', { month: 'long', year: 'numeric' })
 )

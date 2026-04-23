@@ -10,13 +10,10 @@
                :key="worker.id" 
                @click="selectWorker(worker)" 
                class="flex flex-col items-center cursor-pointer group flex-shrink-0">
-            <div class="relative rounded-full p-1.5 transition-all duration-500" 
-                 :class="selectedWorker?.id === worker.id ? 'ring-4 ring-purple-900/30 ring-offset-2' : 'hover:ring-2 hover:ring-stone-200 hover:ring-offset-1'">
-              <img :src="`${config.public.apiBase}${worker.profile_image}`" 
-                   class="w-12 h-12 md:w-24 md:h-24 rounded-full object-cover shadow-md transition-all duration-300" 
-                   :class="selectedWorker?.id === worker.id ? 'scale-100' : 'grayscale-[40%]'" />
+            <div class="relative rounded-full p-1.5 transition-all duration-500" :class="selectedWorker?.id === worker.id ? 'ring-4 ring-purple-900/30 ring-offset-2' : 'hover:ring-2 hover:ring-stone-200 hover:ring-offset-1'">
+              <img :src="`${config.public.apiBase}${worker.profile_image}`" class="w-16 h-16 md:w-24 md:h-24 rounded-full object-cover shadow-md transition-all duration-300" :class="selectedWorker?.id === worker.id ? 'scale-100' : 'grayscale-[40%]'" />
             </div>
-            <span class="mt-2 text-[9px] md:text-sm font-bold uppercase tracking-tight" 
+            <span class="mt-2 text-[11px] md:text-sm font-bold uppercase tracking-tight" 
                   :class="selectedWorker?.id === worker.id ? 'text-purple-900' : 'text-gray-500'">
               {{ worker.user_name }}
             </span>
@@ -31,6 +28,9 @@
           <h2 class="text-lg md:text-2xl font-serif tracking-wide text-gray-900 uppercase">
             {{ selectedWorker?.user_name }} szolgáltatásai
           </h2>
+          <h2 class="text-sm md:text-lg font-serif tracking-wide text-gray-900 uppercase">
+            {{ selectedWorker.services.id }} 
+          </h2>
         </div>
 
         <div v-if="selectedWorker?.services?.length" class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
@@ -43,7 +43,7 @@
                 <h3 class="font-bold text-base md:text-lg text-gray-900 leading-snug group-hover:text-purple-900 transition-colors">
                   {{ service.name }}
                 </h3>
-                <div class="flex items-center text-purple-900 text-[9px] font-bold bg-purple-50 px-2 py-1 rounded-md uppercase">
+                <div class="flex items-center text-purple-900 text-xs bg-purple-50 px-2 py-1 rounded-md uppercase">
                   {{ service.time }}p
                 </div>
               </div>
@@ -138,7 +138,7 @@
       <div class="flex items-center justify-between mb-4">
         <div>
           <p class="text-[10px] uppercase text-stone-400 font-bold tracking-widest">Kiválasztva ({{ cart.length }})</p>
-          <p class="text-xl font-serif text-purple-900">{{ totalSum }} Ft</p>
+          <p class="text-2xl font-serif text-purple-900">{{ totalSum }} Ft</p>
         </div>
         <button @click="handleFinalConfirm" class="bg-purple-900 text-white px-6 py-3 rounded-xl font-bold text-xs uppercase tracking-widest">
           Foglalás
@@ -146,7 +146,7 @@
       </div>
       <div class="flex gap-2 overflow-x-auto no-scrollbar">
         <div v-for="(item, index) in cart" :key="item.id" class="flex-shrink-0 bg-stone-50 px-3 py-2 rounded-lg border border-stone-100 flex items-center gap-2">
-          <span class="text-[10px] font-bold truncate max-w-[80px]">{{ item.name }}</span>
+          <span class="text-base font-light">{{ item.name }}</span>
           <button @click="cart.splice(index, 1)" class="text-red-400 text-xs">✕</button>
         </div>
       </div>
@@ -170,7 +170,6 @@ import { useRoute, useRouter } from 'vue-router';
 import { useAppointmentStore } from '~/stores/appointmentStore';
 const appointmentStore = useAppointmentStore();
 
-// index.vue - a submitReservation függvényben
 const submitReservation = async () => {
   if (!customerData.value.name || !customerData.value.email) {
     alert('Kérlek töltsd ki a neved és az emailed!');
@@ -188,15 +187,13 @@ const submitReservation = async () => {
         email: customerData.value.email,
         phone_number: customerData.value.phone_number
       };
-
       await appointmentStore.saveAppointment(payload, true);
     }
 
     alert('Sikeres foglalás!');
     cart.value = [];
     isReservationModalOpen.value = false;
-  } catch (error) {
-  }
+  } catch (error) { }
 };
 const config = useRuntimeConfig();
 const router = useRouter();
@@ -272,7 +269,6 @@ const selectWorker = (worker) => {
 <style scoped>
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-
 .custom-scrollbar::-webkit-scrollbar { width: 4px; }
 .custom-scrollbar::-webkit-scrollbar-thumb { background: #e5e7eb; border-radius: 10px; }
 .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
