@@ -17,27 +17,32 @@
           <h3 class="text-[10px] font-black text-purple-900 uppercase tracking-widest mb-8 border-b border-stone-100 pb-2 inline-block">
             Időpont kiválasztása
           </h3>
-          <div class="flex justify-between items-center mb-6">
-            <span class="font-serif text-xl capitalize">{{ currentMonthDisplay }}</span>
-          </div>
-          <div class="grid grid-cols-7 gap-1 text-center mb-4">
-            <span v-for="d in ['H','K','Sz','Cs','P','Sz','V']" :key="d" class="text-[9px] font-bold text-stone-300 uppercase">{{ d }}</span>
-          </div>
-          <div class="grid grid-cols-7 gap-2 mb-8">
-            <div
-              v-for="day in weekDays"
-              :key="day.dateString"
-              @click="selectedDateObj = day.fullDate"
-              :class="[
-                'aspect-square flex items-center justify-center text-sm rounded-full cursor-pointer transition-all',
-                isSameDay(selectedDateObj, day.fullDate)
-                  ? 'bg-purple-900 text-white font-bold shadow-lg'
-                  : 'hover:bg-purple-100 text-stone-600'
-              ]"
-            >
-              {{ day.dayNumber }}
-            </div>
-          </div>
+          <div class="flex justify-between items-center mb-6 px-2">
+  <button @click="prevMonth" class="p-2 hover:bg-stone-100 rounded-full transition-colors">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
+  </button>
+  <span class="font-serif text-lg capitalize">{{ currentMonthDisplay }}</span>
+  <button @click="nextMonth" class="p-2 hover:bg-stone-100 rounded-full transition-colors">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+  </button>
+</div>
+
+<div class="grid grid-cols-7 gap-2 mb-8">
+  <div v-for="(day, index) in daysInMonth" :key="index">
+    <div 
+      v-if="day"
+      @click="selectedDateObj = day.fullDate"
+      :class="[
+        'aspect-square flex items-center justify-center text-sm rounded-full cursor-pointer transition-all',
+        isSameDay(selectedDateObj, day.fullDate)
+          ? 'bg-purple-900 text-white font-bold shadow-lg'
+          : 'hover:bg-purple-100 text-stone-600'
+      ]"
+    >
+      {{ day.dayNumber }}
+    </div>
+  </div>
+</div>
 
           <div class="mt-auto bg-white p-6 rounded-[2rem] border border-stone-200 shadow-sm">
             <p class="text-[9px] font-black uppercase text-purple-900 mb-1 tracking-widest">Kiválasztott munka</p>
@@ -213,29 +218,38 @@ watch(() => props.pendingService, () => { if (props.isOpen) fetchSlots() })
 const isSameDay = (d1, d2) => d1.toDateString() === d2.toDateString()
 
 const weekDays = computed(() => {
-  const days  = []
+  const days = []
   const start = new Date()
+  // A hétfőre igazítás marad
   start.setDate(start.getDate() - start.getDay() + (start.getDay() === 0 ? -6 : 1))
-  for (let i = 0; i < 35; i++) {
+  
+  // ITT VÁLTOZTASD MEG A SZÁMOT 90-RE (kb. 3 hónap)
+  for (let i = 0; i < 90; i++) { 
     const d = new Date(start)
     d.setDate(d.getDate() + i)
-    days.push({ dayNumber: d.getDate(), dateString: d.toISOString().split('T')[0], fullDate: d })
+    days.push({ 
+      dayNumber: d.getDate(), 
+      dateString: d.toISOString().split('T')[0], 
+      fullDate: d 
+    })
   }
   return days
 })
 
 const mobileDates = computed(() => {
   const daysShort = ['Vas', 'Hét', 'Ked', 'Sze', 'Csü', 'Pén', 'Szo']
-  return Array.from({ length: 14 }, (_, i) => {
+  
+  // ITT VÁLTOZTASD MEG A HOSSZT, pl. 60-ra
+  return Array.from({ length: 60 }, (_, i) => {
     const d = new Date()
     d.setDate(d.getDate() + i)
-    return { full: d.toISOString().split('T')[0], day: d.getDate(), dayName: daysShort[d.getDay()] }
+    return { 
+      full: d.toISOString().split('T')[0], 
+      day: d.getDate(), 
+      dayName: daysShort[d.getDay()] 
+    }
   })
 })
-
-const currentMonthDisplay = computed(() =>
-  selectedDateObj.value.toLocaleDateString('hu-HU', { month: 'long', year: 'numeric' })
-)
 
 const formatDateLabel = (d) =>
   d.toLocaleDateString('hu-HU', { month: 'long', day: 'numeric' })
@@ -250,6 +264,50 @@ function confirmBooking(slot) {
     endTime:   `${datePart} ${slot.end}:00`,
   })
 }
+
+
+// A script setup részben:
+const currentViewDate = ref(new Date())
+
+const prevMonth = () => {
+  currentViewDate.value = new Date(currentViewDate.value.getFullYear(), currentViewDate.value.getMonth() - 1, 1)
+}
+
+const nextMonth = () => {
+  currentViewDate.value = new Date(currentViewDate.value.getFullYear(), currentViewDate.value.getMonth() + 1, 1)
+}
+
+// Havi napok generálása (üres mezőkkel az elején, hogy jó helyre kerüljön a 1. nap)
+const daysInMonth = computed(() => {
+  const year = currentViewDate.value.getFullYear()
+  const month = currentViewDate.value.getMonth()
+  
+  const firstDay = new Date(year, month, 1).getDay()
+  const padding = (firstDay === 0 ? 6 : firstDay - 1) // Hétfő kezdéshez igazítás
+  
+  const days = []
+  // Üres mezők az 1. nap előtt
+  for (let i = 0; i < padding; i++) {
+    days.push(null)
+  }
+  
+  // Napok hozzáadása
+  const daysInMonthCount = new Date(year, month + 1, 0).getDate()
+  for (let i = 1; i <= daysInMonthCount; i++) {
+    const d = new Date(year, month, i)
+    days.push({ 
+      dayNumber: i, 
+      dateString: d.toISOString().split('T')[0], 
+      fullDate: d 
+    })
+  }
+  return days
+})
+
+// A currentMonthDisplay-t is frissíteni kell:
+const currentMonthDisplay = computed(() =>
+  currentViewDate.value.toLocaleDateString('hu-HU', { month: 'long', year: 'numeric' })
+)
 </script>
 
 <style scoped>
