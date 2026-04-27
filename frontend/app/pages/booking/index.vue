@@ -89,52 +89,75 @@
               </button>
             </div>
           </div>
-          <div v-if="isReservationModalOpen" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/40 backdrop-blur-sm">
-            <div class="bg-white rounded-3xl p-8 shadow-2xl w-full max-w-sm border border-stone-100">
-              <h3 class="text-lg font-bold text-gray-900 mb-6 uppercase tracking-widest">Foglalás véglegesítése</h3>
-              
-              <div class="space-y-4">
-                <div>
-                  <label class="block text-[10px] font-bold text-stone-400 uppercase mb-1">Név</label>
-                  <input v-model="customerData.name" type="text" placeholder="Teljes név" class="w-full px-4 py-3 rounded-xl border border-stone-200 focus:ring-2 focus:ring-purple-900 outline-none">
-                </div>
-                <div>
-                  <label class="block text-[10px] font-bold text-stone-400 uppercase mb-1">Email</label>
-                  <input v-model="customerData.email" type="email" placeholder="email@example.hu" class="w-full px-4 py-3 rounded-xl border border-stone-200 focus:ring-2 focus:ring-purple-900 outline-none">
-                </div>
-                <div>
-                  <label class="block text-[10px] font-bold text-stone-400 uppercase mb-1">Telefonszám</label>
-                  <input v-model="customerData.phone_number" type="text" placeholder="+36201234567" class="w-full px-4 py-3 rounded-xl border border-stone-200 focus:ring-2 focus:ring-purple-900 outline-none">
-                </div>
-              </div>
+          <Teleport to="body">
+              <div v-if="isReservationModalOpen" class="fixed inset-0 h-screen w-screen z-[9999] flex items-center justify-center p-4 bg-stone-900/40 backdrop-blur-sm">
+              <div class="bg-white rounded-3xl p-8 shadow-2xl w-full max-w-sm border border-stone-100">
+                <h3 class="text-lg font-bold text-gray-900 mb-6 uppercase tracking-widest text-center">Foglalás</h3>
 
-              <div class="flex gap-3 mt-8">
-                <button @click="isReservationModalOpen = false" class="flex-1 py-3 rounded-xl font-bold text-xs border border-bg-stone-100 uppercase text-stone-500 hover:bg-stone-100 transition-all">
-                  Mégse
-                </button>
-                <button @click="submitReservation" class="flex-1 bg-purple-900 text-white py-3 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-purple-800 transition-all">
-                  Foglalás
-                </button>
+                <div class="flex p-1 bg-stone-100 rounded-xl mb-6">
+                  <button @click="authMode = 'guest'" 
+                          :class="authMode === 'guest' ? 'bg-white shadow' : 'text-stone-400'"
+                          class="flex-1 py-2 text-[10px] font-bold uppercase rounded-lg transition-all">
+                    Vendégként
+                  </button>
+                  <button @click="authMode = 'google'" 
+                          :class="authMode === 'google' ? 'bg-white shadow' : 'text-stone-400'"
+                          class="flex-1 py-2 text-[10px] font-bold uppercase rounded-lg transition-all">
+                    Google fiókkal
+                  </button>
+                </div>
+                <div v-if="authMode === 'guest'" class="space-y-4">
+                  <div>
+                    <label class="block text-[10px] font-bold text-stone-400 uppercase mb-1">Név</label>
+                    <input v-model="customerData.name" type="text" placeholder="Teljes név" class="w-full px-4 py-3 rounded-xl border border-stone-200 focus:ring-2 focus:ring-purple-900 outline-none">
+                  </div>
+                  <div>
+                    <label class="block text-[10px] font-bold text-stone-400 uppercase mb-1">Email</label>
+                    <input v-model="customerData.email" type="email" placeholder="email@example.hu" class="w-full px-4 py-3 rounded-xl border border-stone-200 focus:ring-2 focus:ring-purple-900 outline-none">
+                  </div>
+                  <div>
+                    <label class="block text-[10px] font-bold text-stone-400 uppercase mb-1">Telefonszám</label>
+                    <input v-model="customerData.phone_number" type="text" placeholder="+36201234567" class="w-full px-4 py-3 rounded-xl border border-stone-200 focus:ring-2 focus:ring-purple-900 outline-none">
+                  </div>
+                </div>
+
+                <div v-else class="py-8 text-center">
+                  <button @click="loginWithGoogle" class="w-full flex items-center justify-center gap-3 border border-stone-200 bg-white py-3 rounded-xl hover:bg-stone-50 transition-all mb-4">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" class="w-5 h-5" alt="Google">
+                    <span class="text-sm font-bold text-gray-700">Folytatás Google-fiókkal</span>
+                  </button>
+                </div>
+
+                <div class="flex gap-3 mt-8">
+                  <button @click="isReservationModalOpen = false" class="flex-1 py-3 rounded-xl font-bold text-xs border border-bg-stone-100 uppercase text-stone-500 hover:bg-stone-100 transition-all">
+                    Mégse
+                  </button>
+                  
+                  <button v-if="authMode === 'guest'" @click="submitReservation" class="flex-1 bg-purple-900 text-white py-3 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-purple-800 transition-all">
+                    Foglalás
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
+            
+          </Teleport>
           <div v-if="selectedWorker" class="bg-white p-6 md:p-8 rounded-3xl shadow-sm border border-stone-100">
-            <h3 class="text-xs font-black text-purple-900 uppercase tracking-widest mb-4">Bemutatkozás</h3>
-            <h2 class="text-xl font-serif text-gray-950 mb-3">{{ selectedWorker.user_name }}</h2>
-            <p class="text-stone-600 italic text-xs leading-relaxed mb-6">"{{ selectedWorker.description || 'Várlak szeretettel!' }}"</p>
-            <h3 class="text-xs font-black text-purple-900 uppercase tracking-widest mb-4 border-t pt-4">Nyitvatartás</h3>
-            <div class="space-y-2">
-              <div v-for="(hours, day) in schedule" :key="day" class="flex justify-between text-xs">
-                <span class="text-stone-500">{{ day }}</span>
-                <span :class="hours === 'Zárva' ? 'text-red-400' : 'text-gray-900'">{{ hours }}</span>
+              <h3 class="text-xs font-black text-purple-900 uppercase tracking-widest mb-4">Bemutatkozás</h3>
+              <h2 class="text-xl font-serif text-gray-950 mb-3">{{ selectedWorker.user_name }}</h2>
+              <p class="text-stone-600 italic text-xs leading-relaxed mb-6">"{{ selectedWorker.description || 'Várlak szeretettel!' }}"</p>
+              <h3 class="text-xs font-black text-purple-900 uppercase tracking-widest mb-4 border-t pt-4">Nyitvatartás</h3>
+              <div class="space-y-2">
+                <div v-for="(hours, day) in schedule" :key="day" class="flex justify-between text-xs">
+                  <span class="text-stone-500">{{ day }}</span>
+                  <span :class="hours === 'Zárva' ? 'text-red-400' : 'text-gray-900'">{{ hours }}</span>
+                </div>
               </div>
             </div>
-          </div>
         </div>
       </div>
     </div>
     
-    <div v-if="cart.length > 0" class="lg:hidden fixed bottom-0 left-0 right-0 bg-white shadow-[0_-10px_25px_rgba(0,0,0,0.1)] z-50 rounded-t-[2rem] border-t border-purple-100 p-5 animate-in slide-in-from-bottom duration-300">
+    <div v-if="cart.length > 0" class="lg:hidden fixed bottom-0 left-0 right-0 bg-white shadow-[0_-10px_25px_rgba(0,0,0,0.1)] z-40 rounded-t-[2rem] border-t border-purple-100 p-5 animate-in slide-in-from-bottom duration-300">
       <div class="flex items-center justify-between mb-4">
         <div>
           <p class="text-[10px] uppercase text-stone-400 font-bold tracking-widest">Kiválasztva ({{ cart.length }})</p>
@@ -195,6 +218,20 @@ const submitReservation = async () => {
     isReservationModalOpen.value = false;
   } catch (error) { }
 };
+// A meglévők mellé add hozzá:
+const authMode = ref('guest'); // 'guest' vagy 'google'
+
+const handleFinalConfirm = () => {
+  if (cart.value.length === 0) return;
+  authMode.value = 'guest'; // Alapértelmezett a vendég mód
+  isReservationModalOpen.value = true;
+};
+
+// Google bejelentkezés metódus
+const handleGoogleLogin = () => {
+  // Ide kell a backend Google OAuth végpontjára mutató hivatkozás
+  window.location.href = `${config.public.apiBase}/auth/google`;
+};
 const config = useRuntimeConfig();
 const router = useRouter();
 const route  = useRoute();
@@ -213,11 +250,35 @@ const customerData = ref({
   phone_number: ''
 });
 
-// Módosított függvény
-const handleFinalConfirm = () => {
-  if (cart.value.length === 0) return;
-  isReservationModalOpen.value = true;
-};
+// A Google gomb funkciója
+const loginWithGoogle = () => {
+  // Mielőtt elnavigálunk, mentsük el a kosarat localStorage-ba, hogy ne vesszen el!
+  localStorage.setItem('cart_backup', JSON.stringify(cart.value));
+  
+  // Átirányítás a backend Google hitelesítő végpontjára
+  window.location.href = `${config.public.apiBase}/api/auth/google`;
+};  
+
+import { onMounted } from 'vue';
+
+onMounted(() => {
+  const urlParams = new URLSearchParams(window.location.search);
+  const name = urlParams.get('g_name');
+  const email = urlParams.get('g_email');
+  const auth = urlParams.get('g_auth');
+
+  if (auth === 'success') {
+    // Kitöltjük az adatokat
+    customerData.value.name = name || '';
+    customerData.value.email = email || '';
+    
+    // Megnyitjuk a modalt, hogy lássa a kitöltött adatokat
+    isReservationModalOpen.value = true;
+    
+    // Opcionális: tisztítsd meg az URL-t, hogy ne látszódjanak a query paraméterek
+    window.history.replaceState({}, document.title, window.location.pathname);
+  }
+});
 
 const handleAddToCart = (bookingData) => {
   cart.value.push({
@@ -259,7 +320,18 @@ const syncWorkerFromUrl = () => {
 
 watch(publicUsers, () => syncWorkerFromUrl(), { immediate: true });
 watch(() => route.query.workerId, () => syncWorkerFromUrl());
-
+watch(selectedWorker, (newWorker, oldWorker) => {
+  if (oldWorker && newWorker && oldWorker.id !== newWorker.id && cart.value.length > 0) {
+    cart.value = [];
+  }
+});
+watch(isReservationModalOpen, (val) => {
+  if (val) {
+    document.body.style.overflow = 'hidden';
+  } else {
+    document.body.style.overflow = '';
+  }
+});
 const selectWorker = (worker) => {
   selectedWorker.value = worker;
   router.replace({ query: { workerId: worker.id } });

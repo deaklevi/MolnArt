@@ -37,9 +37,7 @@
                   'aspect-square flex items-center justify-center text-sm rounded-full cursor-pointer transition-all',
                   isSameDay(selectedDateObj, day.fullDate)
                     ? 'bg-purple-900 text-white font-bold shadow-lg'
-                    : 'hover:bg-purple-100 text-stone-600'
-                ]"
-              >
+                    : 'hover:bg-purple-100 text-stone-600']">
                 {{ day.dayNumber }}
               </div>
             </div>
